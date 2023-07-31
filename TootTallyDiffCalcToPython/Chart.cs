@@ -1,11 +1,10 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace TootTallyDiffCalcTTV2
 {
     public class Chart
     {
-        public readonly float[] GAME_SPEED = { .5f, .75f, 1f, 1.25f, 1.5f, 1.75f, 2f };
-
         public string[][] notes;
         public string[][] bgdata;
         public Dictionary<float, List<Note>> notesDict;
@@ -24,6 +23,8 @@ namespace TootTallyDiffCalcTTV2
         public string difficulty;
         public string year;
         public string songHash;
+        public float maxScore;
+        public float gameMaxScore;
 
         public List<Lyrics> lyrics;
 
@@ -34,27 +35,39 @@ namespace TootTallyDiffCalcTTV2
         public void OnDeserialize()
         {
             notesDict = new Dictionary<float, List<Note>>();
-            for (int i = 0; i < GAME_SPEED.Length; i++)
+            for (int i = 0; i < Utils.GAME_SPEED.Length; i++)
             {
-                var gamespeed = GAME_SPEED[i];
+                var gamespeed = Utils.GAME_SPEED[i];
                 var newTempo = float.Parse(tempo) * gamespeed;
-                var minLength = BeatToSeconds2(0.01, newTempo);
+                var minLength = BeatToSeconds2(0.015, newTempo);
                 int count = 1;
+                maxScore = 0;
+                gameMaxScore = 0;
                 notesDict[i] = new List<Note>(notes.Length);
+
                 foreach (string[] n in notes)
                 {
+                    var length = float.Parse(n[1]);
+                    //Taken from HighscoreAccuracy https://github.com/emmett-shark/HighscoreAccuracy/blob/3f4be49f4ef31b8df1533511c7727bf7813c7773/Utils.cs#L30C1-L30C1
+                    var champBonus = count - 1 > 23 ? 1.5f : 0;
+                    var realCoefficient = (Math.Min(count - 1, 10) + champBonus) * 0.1f + 1f;
+                    var noteScore = (int)Math.Floor(Math.Floor(length * 10f * 100f * realCoefficient) * 10f);
+                    maxScore += noteScore;
+                    gameMaxScore += (int)Math.Floor(Math.Floor(length * 10f * 100f * 1.3f) * 10f);
+
                     notesDict[i].Add(new Note(count, BeatToSeconds2(double.Parse(n[0]), newTempo), BeatToSeconds2(double.Parse(n[1]), newTempo), float.Parse(n[2]), float.Parse(n[3]), float.Parse(n[4])));
-                    if (notesDict[i].Last().length == 0)
+                    if (notesDict[i].Last().length <= 0) //minLength only applies if the note is less or equal to 0 beats, else it keeps its "lower than minimum" length
                         notesDict[i].Last().length = minLength;
                     count++;
                 }
+
             }
 
             performances = new ChartPerformances(this);
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            for (int i = 0; i < GAME_SPEED.Length; i++)
+            for (int i = 0; i < Utils.GAME_SPEED.Length; i++)
             {
                 performances.CalculatePerformances(i);
                 performances.CalculateAnalytics(i);
@@ -64,13 +77,20 @@ namespace TootTallyDiffCalcTTV2
             calculationTime = stopwatch.Elapsed;
         }
 
-        public double GetDiffRating(float speed) => performances.GetDiffRating(speed);
+        // between 0.5f to 2f
+        public double GetBaseTT(float speed) => Utils.CalculateBaseTT(GetDiffRating(Math.Clamp(speed, 0.5f, 2f)));
 
-        public double GetAimPerformance(float speed) => performances.aimAnalyticsDict[speed].perfAverage;
-        public double GetTapPerformance(float speed) => performances.tapAnalyticsDict[speed].perfAverage;
-        public double GetAccPerformance(float speed) => performances.accAnalyticsDict[speed].perfAverage;
+        //Returns the lerped star rating
+        public double GetDiffRating(float speed) => performances.GetDiffRating(Math.Clamp(speed, 0.5f, 2f));
+        public double GetLerpedStarRating(float speed) => performances.GetDiffRating(Math.Clamp(speed, 0.5f, 2f));
 
-        public double GetStarRating(float speed) => performances.starRatingDict[speed];
+        public double GetAimPerformance(float speed) => performances.aimAnalyticsDict[SpeedToIndex(speed)].perfWeightedAverage;
+        public double GetTapPerformance(float speed) => performances.tapAnalyticsDict[SpeedToIndex(speed)].perfWeightedAverage;
+        public double GetAccPerformance(float speed) => performances.accAnalyticsDict[SpeedToIndex(speed)].perfWeightedAverage;
+
+        public double GetStarRating(float speed) => performances.starRatingDict[SpeedToIndex(speed)];
+
+        public float SpeedToIndex(float speed) => (int)((Math.Clamp(speed, 0.5f, 2f) - 0.5f) / .25f);
 
         public class Lyrics
         {

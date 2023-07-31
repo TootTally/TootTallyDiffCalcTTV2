@@ -7,6 +7,9 @@ namespace TootTallyDiffCalcTTV2
     {
         #region hellooffbeatwitch
         public static List<Chart> chartList;
+        public const string VERSION_LABEL = "2.0.1";
+        public const string BUILD_DATE = "07312023";
+        
         public static void Main()
         {
             while (true)
@@ -30,7 +33,7 @@ namespace TootTallyDiffCalcTTV2
                     });
                     stopwatch.Stop();
                     Console.WriteLine($"Total calculation time took: {stopwatch.Elapsed.TotalSeconds}s for {chartList.Count} charts and {chartList.Count * 7} diffs");
-                } 
+                }
                 else
                     Console.WriteLine($"Chart {path} couldn't be found");
             }
@@ -42,6 +45,8 @@ namespace TootTallyDiffCalcTTV2
             if (writeToConsole)
             {
                 Console.WriteLine($"{chart.name} processed in {chart.calculationTime.TotalSeconds}s");
+                Console.WriteLine($"MaxScore: {chart.maxScore}");
+                Console.WriteLine($"GameMaxScore: {chart.gameMaxScore}");
                 Console.WriteLine("=====================================================================================================");
                 for (int i = 0; i < 7; i++)
                     DisplayAtSpeed(chart, i);
@@ -79,7 +84,7 @@ namespace TootTallyDiffCalcTTV2
             ChartPerformances.DataVectorAnalytics aimAnalytics = chart.performances.aimAnalyticsDict[speedIndex];
             ChartPerformances.DataVectorAnalytics tapAnalytics = chart.performances.tapAnalyticsDict[speedIndex];
             ChartPerformances.DataVectorAnalytics accAnalytics = chart.performances.accAnalyticsDict[speedIndex];
-            Console.WriteLine($"SPEED: {chart.GAME_SPEED[speedIndex]:0.00}x rated {chart.GetStarRating(speedIndex):0.0000}");
+            Console.WriteLine($"SPEED: {Utils.GAME_SPEED[speedIndex]:0.00}x rated {chart.GetStarRating(Utils.GAME_SPEED[speedIndex]):0.0000}");
             Console.WriteLine($"  aim: {aimAnalytics.perfWeightedAverage:0.0000} min: {aimAnalytics.perfMin:0.0000} max: {aimAnalytics.perfMax:0.0000}");
             Console.WriteLine($"  tap: {tapAnalytics.perfWeightedAverage:0.0000} min: {tapAnalytics.perfMin:0.0000} max: {tapAnalytics.perfMax:0.0000}");
             Console.WriteLine($"  acc: {accAnalytics.perfWeightedAverage:0.0000} min: {accAnalytics.perfMin:0.0000} max: {accAnalytics.perfMax:0.0000}");

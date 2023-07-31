@@ -36,7 +36,7 @@
             accAnalyticsDict = new Dictionary<float, DataVectorAnalytics>(7);
 
 
-            for (int i = 0; i < chart.GAME_SPEED.Length; i++)
+            for (int i = 0; i < Utils.GAME_SPEED.Length; i++)
             {
                 aimPerfDict[i] = new List<DataVector>(chart.notes.Length) { new DataVector(0, 0, 0) };
                 tapPerfDict[i] = new List<DataVector>(chart.notes.Length) { new DataVector(0, 0, 0) };
@@ -50,15 +50,13 @@
         {
 
             var noteList = _chart.notesDict[speedIndex];
-            var MAX_TIME = BeatToSeconds2(0.05, float.Parse(_chart.tempo) * _chart.GAME_SPEED[speedIndex]);
+            var MAX_TIME = BeatToSeconds2(0.05, float.Parse(_chart.tempo) * Utils.GAME_SPEED[speedIndex]);
             var AVERAGE_NOTE_LENGTH = noteList.Average(n => n.length);
             var TOTAL_NOTE_LENGTH = noteList.Sum(n => n.length);
             var aimEndurance = 0.05d;
             var tapEndurance = 0.15d;
             var endurance_decay = 1.006d;
 
-            //Trace.WriteLine($"{_chart.name,15} T: " + TOTAL_NOTE_LENGTH);
-            //Trace.WriteLine($"{_chart.name,15} A: " + AVERAGE_NOTE_LENGTH);
 
             for (int i = 0; i < noteList.Count - 1; i++) //Main Forward Loop
             {
@@ -191,6 +189,8 @@
             return accStrain;
         }
 
+
+
         public static double CalcAimEndurance(Note nextNote, Note previousNote, double weight, double directionalMultiplier, double MAX_TIME)
         {
             var endurance = 0d;
@@ -262,29 +262,12 @@
             if (speed % .25f == 0)
                 return starRatingDict[index];
 
-            var minSpeed = _chart.GAME_SPEED[index];
-            var maxSpeed = _chart.GAME_SPEED[index + 1];
+            var minSpeed = Utils.GAME_SPEED[index];
+            var maxSpeed = Utils.GAME_SPEED[index + 1];
             var by = (speed - minSpeed) / (maxSpeed - minSpeed);
-            return Lerp(starRatingDict[index], starRatingDict[index + 1], by);
+            return Utils.Lerp(starRatingDict[index], starRatingDict[index + 1], by);
         }
 
-        public static double Lerp(double firstFloat, double secondFloat, float by) //Linear easing
-        {
-            return firstFloat + (secondFloat - firstFloat) * by;
-        }
-
-        public static double FastPow(double num, int exp)
-        {
-            double result = 1.0;
-            while (exp > 0)
-            {
-                if (exp % 2 == 1)
-                    result *= num;
-                exp >>= 1;
-                num *= num;
-            }
-            return result;
-        }
 
         public enum Direction
         {
@@ -318,6 +301,7 @@
                 perfWeightedAverage = double.IsNaN(weightedAverage) ? 0 : weightedAverage;
                 perfMax = dataVectorList.Max(x => x.performance);
                 perfMin = dataVectorList.Min(x => x.performance);
+                perfAverage = dataVectorList.Average(x => x.performance);
             }
 
             public static double CalculateWeightedAverage(List<DataVector> dataVectorList) => dataVectorList.Sum(x => x.performance * x.weight) / dataVectorList.Sum(x => x.weight);
