@@ -1,4 +1,7 @@
-﻿namespace TootTallyDiffCalcTTV2
+﻿using System.Globalization;
+using System.Runtime.InteropServices;
+
+namespace TootTallyDiffCalcTTV2
 {
     public class ChartPerformances
     {
@@ -50,17 +53,17 @@
         {
 
             var noteList = _chart.notesDict[speedIndex];
-            var MAX_TIME = BeatToSeconds2(0.05, float.Parse(_chart.tempo) * Utils.GAME_SPEED[speedIndex]);
+            var MAX_TIME = BeatToSeconds2(0.05, float.Parse(_chart.tempo, NumberStyles.Any, TootTallyDiffCalcTTV2.ci) * Utils.GAME_SPEED[speedIndex]);
             var AVERAGE_NOTE_LENGTH = noteList.Average(n => n.length);
             var TOTAL_NOTE_LENGTH = noteList.Sum(n => n.length);
             var aimEndurance = 0.05d;
             var tapEndurance = 0.15d;
             var endurance_decay = 1.006d;
 
-
-            for (int i = 0; i < noteList.Count - 1; i++) //Main Forward Loop
+            var noteListSpan = CollectionsMarshal.AsSpan(noteList);
+            for (int i = 0; i < noteListSpan.Length - 1; i++) //Main Forward Loop
             {
-                var currentNote = noteList[i];
+                var currentNote = noteListSpan[i];
                 var previousNote = currentNote;
                 var comboMultiplier = 0.8d;
                 var directionMultiplier = 1d;
@@ -68,10 +71,10 @@
                 Direction currentDirection = Direction.Null, previousDirection = Direction.Null;
 
                 var lenCount = 0;
-                for (int j = i + 1; j < noteList.Count && j < i + 10; j++)
+                for (int j = i + 1; j < noteListSpan.Length && j < i + 10; j++)
                 {
                     //Combo Calc
-                    lengthSum += noteList[j].length;
+                    lengthSum += noteListSpan[j].length;
                     lenCount++;
                 }
                 comboMultiplier += lengthSum;
@@ -81,9 +84,9 @@
                 var tapStrain = 0d;
                 var accStrain = 0d;
 
-                for (int j = i + 1; j < noteList.Count && j < i + 26 && noteList[j].position - (currentNote.position + currentNote.length) <= 4; j++)
+                for (int j = i + 1; j < noteListSpan.Length && j < i + 26 && noteListSpan[j].position - (currentNote.position + currentNote.length) <= 4; j++)
                 {
-                    var nextNote = noteList[j];
+                    var nextNote = noteListSpan[j];
                     var weight = weights[j - i - 1];
                     var endDecayMult = Math.Pow(endurance_decay, weight);
                     if (aimEndurance > 1f)
@@ -100,14 +103,17 @@
                     tapEndurance += CalcTapEndurance(nextNote, previousNote, weight);
 
                     //Acc Calc
-                    accStrain += Math.Sqrt(CalcAccStrain(nextNote, previousNote, weight, comboMultiplier, directionMultiplier, AVERAGE_NOTE_LENGTH, TOTAL_NOTE_LENGTH)) / 52f; // I can't figure that out yet
+                    accStrain += Math.Sqrt(CalcAccStrain(nextNote, previousNote, weight, comboMultiplier, directionMultiplier, AVERAGE_NOTE_LENGTH)) / 52f; // I can't figure that out yet
 
                     previousNote = nextNote;
 
                 }
                 var lenWeight = currentNote.length / TOTAL_NOTE_LENGTH;
-                aimPerfDict[speedIndex].Add(new DataVector(currentNote.position, aimStrain, lenWeight));
+                if (aimStrain != 0)
+                    aimPerfDict[speedIndex].Add(new DataVector(currentNote.position, aimStrain, lenWeight));
+                if (tapStrain != 0)
                 tapPerfDict[speedIndex].Add(new DataVector(currentNote.position, tapStrain, lenWeight));
+                if (accStrain != 0)
                 accPerfDict[speedIndex].Add(new DataVector(currentNote.position, accStrain, lenWeight));
             }
         }
@@ -117,7 +123,7 @@
             double speed = 0d;
 
             //Calc the space between two notes if they aren't connected sliders
-            if (nextNote.position - (previousNote.position + previousNote.length) > 0)
+            if (!IsSlider(nextNote, previousNote))
             {
                 //check for the direction of the space
                 if (nextNote.pitchStart - previousNote.pitchEnd != 0)
@@ -157,7 +163,7 @@
         public static double CalcTapStrain(Note nextNote, Note previousNote, double weight, double comboMultiplier, double endurance, double MAX_TIMEDELTA)
         {
             var tapStrain = 0d;
-            if (nextNote.position - (previousNote.position + previousNote.length) > 0)
+            if (!IsSlider(nextNote, previousNote))
             {
                 var timeDelta = Math.Max(nextNote.position - previousNote.position, MAX_TIMEDELTA);
                 var strain = 10.5f / Math.Pow(timeDelta, 1.75f);
@@ -168,12 +174,12 @@
 
         public static bool CheckDirectionChange(Direction prevDir, Direction currDir) => (prevDir != currDir && prevDir != Direction.Null && currDir != Direction.Null);
 
-        public static double CalcAccStrain(Note nextNote, Note previousNote, double weight, double comboMultiplier, double directionMultiplier, double AVERAGE_NOTE_LENGTH, double TOTAL_NOTE_LENGTH)
+        public static double CalcAccStrain(Note nextNote, Note previousNote, double weight, double comboMultiplier, double directionMultiplier, double AVERAGE_NOTE_LENGTH)
         {
             var accStrain = 0d;
             var lengthmult = Math.Sqrt((nextNote.length * 1.01f) / AVERAGE_NOTE_LENGTH);
 
-            if (nextNote.position - (previousNote.position + previousNote.length) > 0)
+            if (!IsSlider(nextNote, previousNote))
             {
                 var noteHeight = MathF.Abs(nextNote.pitchStart - previousNote.pitchEnd) / (nextNote.position - previousNote.position);
                 var strain = noteHeight * lengthmult;
@@ -196,7 +202,7 @@
             var endurance = 0d;
             var enduranceAimStrain = 0d;
 
-            if (nextNote.position - (previousNote.position + previousNote.length) > 0)
+            if (!IsSlider(nextNote, previousNote))
             {
                 var distance = Math.Sqrt(MathF.Abs(nextNote.pitchStart - previousNote.pitchEnd)) * nextNote.length;
                 var t = nextNote.position - (previousNote.position + previousNote.length);
@@ -216,7 +222,7 @@
             var endurance = 0d;
 
             var enduranceTapStrain = 0d;
-            if (nextNote.position - (previousNote.position + previousNote.length) > 0)
+            if (!IsSlider(nextNote, previousNote))
             {
                 var timeDelta = nextNote.position - previousNote.position;
                 enduranceTapStrain = 0.45f / Math.Pow(timeDelta, 1.75f);
@@ -226,6 +232,8 @@
 
             return endurance * weight;
         }
+
+        public static bool IsSlider(Note nextNote, Note previousNote) => !(Math.Round(nextNote.position - (previousNote.position + previousNote.length),3) > 0);
 
         public void CalculateAnalytics(float gamespeed)
         {

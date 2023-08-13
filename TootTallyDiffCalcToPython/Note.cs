@@ -4,9 +4,9 @@
     {
         public int count;
         public float pitchStart, pitchDelta, pitchEnd;
-        public double position, length;
+        public float position, length;
 
-        public Note(int count, double position, double length, float pitchStart, float pitchDelta, float pitchEnd)
+        public Note(int count, float position, float length, float pitchStart, float pitchDelta, float pitchEnd)
         {
             this.count = count;
             this.position = position;

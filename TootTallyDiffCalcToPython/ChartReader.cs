@@ -1,9 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System.IO;
-using System.IO.Compression;
-using System.Reflection.PortableExecutable;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace TootTallyDiffCalcTTV2
 {
@@ -19,7 +15,6 @@ namespace TootTallyDiffCalcTTV2
             StreamReader reader = new StreamReader(path);
             string json = reader.ReadToEnd();
             Chart chart = JsonConvert.DeserializeObject<Chart>(json);
-            chart.songHash = CalcSHA256Hash(Encoding.UTF8.GetBytes(File.ReadAllText(path).Replace("\n", "").Replace("\t", "")));
             chart.OnDeserialize();
             reader.Close();
             return chart;

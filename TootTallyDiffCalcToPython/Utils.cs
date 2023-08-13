@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TootTallyDiffCalcTTV2
+﻿namespace TootTallyDiffCalcTTV2
 {
     public static class Utils
     {

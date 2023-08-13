@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using System.IO;
+using System.Globalization;
 
 namespace TootTallyDiffCalcTTV2
 {
@@ -7,15 +7,19 @@ namespace TootTallyDiffCalcTTV2
     {
         #region hellooffbeatwitch
         public static List<Chart> chartList;
-        public const string VERSION_LABEL = "2.0.1";
-        public const string BUILD_DATE = "07312023";
-        
+        public const string VERSION_LABEL = "2.1.0";
+        public const string BUILD_DATE = "08122023";
+        public static CultureInfo ci;
+
         public static void Main()
         {
+            ci = (CultureInfo)CultureInfo.CurrentCulture.Clone();
+            ci.NumberFormat.CurrencyDecimalSeparator = ".";
             while (true)
             {
-                Console.Write("Input tmb file name or tmbs directory: ");
-                var path = @"" + Console.ReadLine();
+                Console.Write("Input tmb file name or tmbs directory: " + AppDomain.CurrentDomain.BaseDirectory);
+                var path = @"" + AppDomain.CurrentDomain.BaseDirectory + Console.ReadLine();
+                Console.Clear();
                 if (File.Exists(path))
                 {
                     OutputSingleChart(path, true);
@@ -29,13 +33,76 @@ namespace TootTallyDiffCalcTTV2
                     stopwatch.Start();
                     Parallel.ForEach(files, f =>
                     {
-                        chartList.Add(ProcessChart(f));
+                        if (f.Contains(".tmb"))
+                            chartList.Add(ProcessChart(f));
                     });
                     stopwatch.Stop();
                     Console.WriteLine($"Total calculation time took: {stopwatch.Elapsed.TotalSeconds}s for {chartList.Count} charts and {chartList.Count * 7} diffs");
+                    for (int i = 0; i < chartList.Count; i++)
+                    {
+                        OutputErrors(chartList[i]);
+                    }
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("=================================UNRATABLE CHARTS=================================");
+                    foreach (var chart in chartList.Where(chart => chart.ratingErrors.Any(error => error.errorLevel == RatingCriterias.ErrorLevel.Error && error.errorType == RatingCriterias.ErrorType.Spacing)))
+                        Console.WriteLine($"{chart.name} - {chart.ratingErrors.Where(error => error.errorLevel == RatingCriterias.ErrorLevel.Error).Count()} errors");
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
                 else
                     Console.WriteLine($"Chart {path} couldn't be found");
+            }
+        }
+
+        public static void OutputErrors(Chart chart)
+        {
+            if (chart.ratingErrors.Count > 0)
+            {
+                var errorCount = chart.ratingErrors.Where(error => error.errorLevel == RatingCriterias.ErrorLevel.Error).Count();
+                var warningCount = chart.ratingErrors.Where(error => error.errorLevel == RatingCriterias.ErrorLevel.Warning).Count();
+                Console.ForegroundColor = errorCount > 0 ? ConsoleColor.Red : ConsoleColor.White;
+                Console.WriteLine($"------------------------------------------------------------------------");
+                Console.WriteLine($"{chart.shortName} has {errorCount} errors and {warningCount} warnings.");
+                if (errorCount > 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"=================================ERRORS=================================");
+                    foreach (var error in chart.ratingErrors.Where(error => error.errorLevel == RatingCriterias.ErrorLevel.Error))
+                        Console.WriteLine($"{error.errorType} - #{error.noteID} - {error.timing}s - {error.value}");
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"");
+                    Console.WriteLine($"============================No errors found=============================");
+                    Console.WriteLine($"");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+                if (warningCount > 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"================================WARNINGS================================");
+                    foreach (var error in chart.ratingErrors.Where(error => error.errorLevel == RatingCriterias.ErrorLevel.Warning))
+                        Console.WriteLine($"{error.errorType} - #{error.noteID} - {error.timing}s - {error.value}");
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"===========================No Warnings found============================");
+                    Console.WriteLine($"");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"------------------------------------------------------------------------");
+                Console.WriteLine($"");
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"------------------------------------------------------------------------");
+                Console.WriteLine($"{chart.shortName} has no errors and no warnings.");
+                    Console.WriteLine($"------------------------------------------------------------------------");
+                Console.WriteLine($"");
+                Console.ForegroundColor = ConsoleColor.White;
             }
         }
 
@@ -51,10 +118,16 @@ namespace TootTallyDiffCalcTTV2
                 for (int i = 0; i < 7; i++)
                     DisplayAtSpeed(chart, i);
                 Console.WriteLine("=====================================================================================================");
+                Console.WriteLine("");
+                OutputErrors(chart);
+
+                //Trace.WriteLine(File.ReadAllText(path));
+                //Trace.WriteLine(ChartReader.CalcSHA256Hash(Encoding.UTF8.GetBytes(File.ReadAllText(path))));
             }
-            
+
         }
         #endregion
+
 
         public static Chart ProcessChart(string path) => ChartReader.LoadChart(path);
 
