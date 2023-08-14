@@ -53,7 +53,7 @@ namespace TootTallyDiffCalcTTV2
         {
 
             var noteList = _chart.notesDict[speedIndex];
-            var MAX_TIME = BeatToSeconds2(0.05, float.Parse(_chart.tempo, NumberStyles.Any, TootTallyDiffCalcTTV2.ci) * Utils.GAME_SPEED[speedIndex]);
+            var MAX_TIME = BeatToSeconds2(0.05, float.Parse(_chart.tempo) * Utils.GAME_SPEED[speedIndex]);
             var AVERAGE_NOTE_LENGTH = noteList.Average(n => n.length);
             var TOTAL_NOTE_LENGTH = noteList.Sum(n => n.length);
             var aimEndurance = 0.05d;

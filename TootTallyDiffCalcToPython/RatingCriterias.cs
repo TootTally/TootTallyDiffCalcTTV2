@@ -44,7 +44,7 @@
                         errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.NoteVelocity, i, currentNote.position, Math.Abs(currentNote.pitchEnd - nextNote.pitchStart) / (nextNote.position - (currentNote.position + currentNote.length))));
 
 
-                //note spacing bigger than 1/60th of 1s
+                //note spacing bigger than 2/60th of 1s
                 if (currentNote.pitchDelta == 0 && Math.Round(nextNote.position - (currentNote.position + currentNote.length), 3) > 0)
                     if (nextNote.position - (currentNote.position + currentNote.length) <= 2d / 60d)
                         errors.Add(new RatingError(ErrorLevel.Error, ErrorType.Spacing, i, currentNote.position, nextNote.position - (currentNote.position + currentNote.length)));

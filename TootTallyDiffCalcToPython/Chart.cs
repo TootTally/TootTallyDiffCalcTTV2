@@ -39,9 +39,7 @@ namespace TootTallyDiffCalcTTV2
             {
                 var gamespeed = Utils.GAME_SPEED[i];
 
-                if (!TryParsingFloat(tempo, out float t1)) continue;
-
-                var newTempo = t1 * gamespeed;
+                var newTempo = float.Parse(tempo) * gamespeed;
                 var minLength = BeatToSeconds2(0.015f, newTempo);
                 int count = 1;
                 maxScore = 0;
@@ -50,7 +48,7 @@ namespace TootTallyDiffCalcTTV2
 
                 foreach (string[] n in notes)
                 {
-                    if (!TryParsingFloat(n[1], out float length)) continue;
+                    float length = float.Parse(n[1]);
                     //Taken from HighscoreAccuracy https://github.com/emmett-shark/HighscoreAccuracy/blob/3f4be49f4ef31b8df1533511c7727bf7813c7773/Utils.cs#L30C1-L30C1
                     var champBonus = count - 1 > 23 ? 1.5f : 0;
                     var realCoefficient = (Math.Min(count - 1, 10) + champBonus) * 0.1f + 1f;
@@ -58,14 +56,7 @@ namespace TootTallyDiffCalcTTV2
                     maxScore += noteScore;
                     gameMaxScore += (int)Math.Floor(Math.Floor(length * 10f * 100f * 1.3f) * 10f);
 
-                    if (!TryParsingFloat(n[0], out float n0)) continue;
-                    if (!TryParsingFloat(n[1], out float n1)) continue;
-                    if (!TryParsingFloat(n[2], out float n2)) continue;
-                    if (!TryParsingFloat(n[3], out float n3)) continue;
-                    if (!TryParsingFloat(n[4], out float n4)) continue;
-
-
-                    notesDict[i].Add(new Note(count, BeatToSeconds2(n0, newTempo), BeatToSeconds2(n1, newTempo), n2, n3, n4));
+                    notesDict[i].Add(new Note(count, BeatToSeconds2(float.Parse(n[0]), newTempo), BeatToSeconds2(float.Parse(n[1]), newTempo), float.Parse(n[2]), float.Parse(n[3]), float.Parse(n[4])));
                     if (notesDict[i].Last().length <= 0) //minLength only applies if the note is less or equal to 0 beats, else it keeps its "lower than minimum" length
                         notesDict[i].Last().length = minLength;
                     count++;
@@ -110,15 +101,5 @@ namespace TootTallyDiffCalcTTV2
 
         public static float BeatToSeconds2(float beat, float bpm) => (60f / bpm) * beat;
 
-
-        public static bool TryParsingFloat(string value, out float result)
-        {
-            if (!float.TryParse(value, NumberStyles.Any, TootTallyDiffCalcTTV2.ci, out result))
-            {
-                Console.WriteLine($"{value} couldn't be parse as float.");
-                    return false;
-            }
-            return true;
-        }
     }
 }
