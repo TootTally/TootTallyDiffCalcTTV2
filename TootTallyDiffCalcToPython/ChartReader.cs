@@ -40,5 +40,12 @@ namespace TootTallyDiffCalcTTV2
                 return ret;
             }
         }
+
+        public static void SaveChartData(string path, string json)
+        {
+            StreamWriter writer = new StreamWriter(path);
+            writer.WriteLine(json);
+            writer.Close();
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace TootTallyDiffCalcTTV2
+﻿using static System.Formats.Asn1.AsnWriter;
+
+namespace TootTallyDiffCalcTTV2
 {
     public static class Utils
     {
@@ -27,16 +29,20 @@
         public static double CalculateBaseTT(double starRating)
         {
 
-            return 1.05f * FastPow(starRating, 2) + (3f * starRating) + 0.01f;
-            //y = 1.05x^2 + 3x + 0.01
+            return (0.7f * FastPow(starRating, 2) + (12f * starRating) + 0.05f)/1.5f;
+            //y = (0.7x^2 + 12x + 0.05)/1.5
         }
 
-        //https://www.desmos.com/calculator/bnyo9f5u1y
+        //https://www.desmos.com/calculator/6yczzjjnpy
         public static double CalculateScoreTT(Chart chart, float replaySpeed, float percent)
         {
             var baseTT = CalculateBaseTT(chart.GetDiffRating(replaySpeed));
 
-            var scoreTT = ((0.028091281 * Math.Pow(Math.E, 6d * percent)) - 0.028091281) * baseTT;
+            double scoreTT;
+            if (percent < 0.6f)
+                scoreTT = ((21.433d * FastPow(percent, 6)) - 0.028091281d) * baseTT;
+            else
+                scoreTT = 0.028091281d * Math.Pow(Math.E, 6d * percent) * baseTT;
             //y = (0.28091281 * e^6x - 0.028091281) * b
 
             return scoreTT;
@@ -46,7 +52,11 @@
         {
             var baseTT = CalculateBaseTT(LerpDiff(diffRatings, replaySpeed));
 
-            var scoreTT = ((0.028091281 * Math.Pow(Math.E, 6d * percent)) - 0.028091281) * baseTT;
+            double scoreTT;
+            if (percent < 0.6f)
+                scoreTT = 21.433d * FastPow(percent, 6) * baseTT;
+            else
+                scoreTT = ((0.028091281d * Math.Pow(Math.E, 6d * percent)) - 0.028091281d) * baseTT;
             //y = (0.28091281 * e^6x - 0.028091281) * b
 
             return scoreTT;

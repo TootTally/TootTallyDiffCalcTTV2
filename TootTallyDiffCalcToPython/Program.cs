@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Newtonsoft.Json;
+using System.Diagnostics;
 using System.Globalization;
 
 namespace TootTallyDiffCalcTTV2
@@ -7,8 +8,8 @@ namespace TootTallyDiffCalcTTV2
     {
         #region hellooffbeatwitch
         public static List<Chart> chartList;
-        public const string VERSION_LABEL = "2.1.0";
-        public const string BUILD_DATE = "08122023";
+        public const string VERSION_LABEL = "2.2.2";
+        public const string BUILD_DATE = "08252023";
         public static StreamWriter fileWriter;
 
         public static void Main()
@@ -44,7 +45,7 @@ namespace TootTallyDiffCalcTTV2
                     }
                     Console.ForegroundColor = ConsoleColor.Red;
                     WriteToConsoleAndFile("=================================UNRATABLE CHARTS=================================");
-                    foreach (var chart in chartList.Where(chart => chart.ratingErrors.Any(error => error.errorLevel == RatingCriterias.ErrorLevel.Error && error.errorType == RatingCriterias.ErrorType.Spacing)))
+                    foreach (var chart in chartList.Where(chart => chart.ratingErrors.Any(error => error.errorLevel == RatingCriterias.ErrorLevel.Error && error.errorType != RatingCriterias.ErrorType.HotStart)))
                         WriteToConsoleAndFile($"{chart.name} - {chart.ratingErrors.Where(error => error.errorLevel == RatingCriterias.ErrorLevel.Error).Count()} errors");
                     Console.ForegroundColor = ConsoleColor.White;
                 }

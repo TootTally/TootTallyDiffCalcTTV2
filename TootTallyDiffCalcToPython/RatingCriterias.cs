@@ -6,11 +6,19 @@
         public static List<RatingError> GetRatingErrors(Chart chart)
         {
             List<RatingError> errors = new List<RatingError>();
+            var lastNote = chart.notesDict[2].Last();
+            if (chart.notesDict[2].Count < 24)
+                errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.NoteCount, 0, 0, chart.notesDict[2].Count));
+            if (lastNote.position + lastNote.length - chart.notesDict[2][0].position <= 10f)
+                errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.MapLength, chart.notesDict[2].Count - 1, lastNote.position + lastNote.length, lastNote.position + lastNote.length));
+
             for (int i = 0; i < chart.notesDict[2].Count - 1; i++)
             {
 
                 Note currentNote = chart.notesDict[2][i];
                 Note nextNote = chart.notesDict[2][i + 1];
+
+
 
                 //notes starts within 1s of chart start
                 if (currentNote.position <= 0.8d)
@@ -76,7 +84,7 @@
             {
                 this.errorLevel = errorLevel;
                 this.errorType = errorType;
-                this.noteID = noteID;
+                this.noteID = noteID + 1;
                 this.timing = timing;
                 this.value = value;
             }
@@ -91,6 +99,8 @@
 
         public enum ErrorType
         {
+            NoteCount,
+            MapLength,
             HotStart,
             MaxLength,
             Spacing,

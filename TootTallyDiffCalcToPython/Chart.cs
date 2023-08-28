@@ -5,14 +5,14 @@ namespace TootTallyDiffCalcTTV2
 {
     public class Chart
     {
-        public string[][] notes;
+        public float[][] notes;
         public string[][] bgdata;
         public Dictionary<float, List<Note>> notesDict;
         public List<string> note_color_start;
         public List<string> note_color_end;
-        public string endpoint;
-        public string savednotespacing;
-        public string tempo;
+        public float endpoint;
+        public float savednotespacing;
+        public float tempo;
         public string timesig;
         public string trackRef;
         public string name;
@@ -39,16 +39,16 @@ namespace TootTallyDiffCalcTTV2
             {
                 var gamespeed = Utils.GAME_SPEED[i];
 
-                var newTempo = float.Parse(tempo) * gamespeed;
-                var minLength = BeatToSeconds2(0.015f, newTempo);
+                var newTempo = tempo * gamespeed;
+                var minLength = BeatToSeconds2(0.01f, newTempo);
                 int count = 1;
                 maxScore = 0;
                 gameMaxScore = 0;
                 notesDict[i] = new List<Note>(notes.Length);
 
-                foreach (string[] n in notes)
+                foreach (float[] n in notes)
                 {
-                    float length = float.Parse(n[1]);
+                    float length = n[1];
                     //Taken from HighscoreAccuracy https://github.com/emmett-shark/HighscoreAccuracy/blob/3f4be49f4ef31b8df1533511c7727bf7813c7773/Utils.cs#L30C1-L30C1
                     var champBonus = count - 1 > 23 ? 1.5f : 0;
                     var realCoefficient = (Math.Min(count - 1, 10) + champBonus) * 0.1f + 1f;
@@ -56,7 +56,7 @@ namespace TootTallyDiffCalcTTV2
                     maxScore += noteScore;
                     gameMaxScore += (int)Math.Floor(Math.Floor(length * 10f * 100f * 1.3f) * 10f);
 
-                    notesDict[i].Add(new Note(count, BeatToSeconds2(float.Parse(n[0]), newTempo), BeatToSeconds2(float.Parse(n[1]), newTempo), float.Parse(n[2]), float.Parse(n[3]), float.Parse(n[4])));
+                    notesDict[i].Add(new Note(count, BeatToSeconds2(n[0], newTempo), BeatToSeconds2(length, newTempo), n[2], n[3], n[4]));
                     if (notesDict[i].Last().length <= 0) //minLength only applies if the note is less or equal to 0 beats, else it keeps its "lower than minimum" length
                         notesDict[i].Last().length = minLength;
                     count++;
