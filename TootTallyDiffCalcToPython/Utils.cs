@@ -33,7 +33,7 @@ namespace TootTallyDiffCalcTTV2
             //y = (0.7x^2 + 12x + 0.05)/1.5
         }
 
-        //https://www.desmos.com/calculator/6yczzjjnpy
+        //https://www.desmos.com/calculator/x7c0zutgsn
         public static double CalculateScoreTT(Chart chart, float replaySpeed, float percent)
         {
             var baseTT = CalculateBaseTT(chart.GetDiffRating(replaySpeed));
@@ -41,13 +41,16 @@ namespace TootTallyDiffCalcTTV2
             double scoreTT;
             if (percent < 0.6f)
                 scoreTT = ((21.433d * FastPow(percent, 6)) - 0.028091281d) * baseTT;
+            else if (percent < 0.98f)
+                scoreTT = ((0.028091281d * Math.Pow(Math.E, 6d * percent)) - 0.028091281d) * baseTT;
             else
-                scoreTT = 0.028091281d * Math.Pow(Math.E, 6d * percent) * baseTT;
+                scoreTT = FastPow(9.2d * percent - 7.43037117d, 5) * baseTT;
             //y = (0.28091281 * e^6x - 0.028091281) * b
 
             return scoreTT;
         }
 
+        //https://www.desmos.com/calculator/x7c0zutgsn
         public static double CalculateScoreTT(float[] diffRatings, float replaySpeed, float percent)
         {
             var baseTT = CalculateBaseTT(LerpDiff(diffRatings, replaySpeed));
@@ -55,8 +58,10 @@ namespace TootTallyDiffCalcTTV2
             double scoreTT;
             if (percent < 0.6f)
                 scoreTT = 21.433d * FastPow(percent, 6) * baseTT;
-            else
+            else if (percent < 0.98f)
                 scoreTT = ((0.028091281d * Math.Pow(Math.E, 6d * percent)) - 0.028091281d) * baseTT;
+            else
+                scoreTT = FastPow(9.2d * percent - 7.43037117d, 5) * baseTT;
             //y = (0.28091281 * e^6x - 0.028091281) * b
 
             return scoreTT;

@@ -37,6 +37,9 @@
                 else if (length > 4.4d)
                     errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.MaxLength, i, currentNote.position, length));
 
+                if (currentNote.length > 0 && currentNote.length < 0.001f)
+                    errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.NoteLength, i, currentNote.position, length));
+
                 //sliders velocity more than 2.5k u/s, warning 1.25k
                 if (Math.Abs(currentNote.pitchDelta) >= 34.375d)
                     if (Math.Abs(currentNote.pitchDelta) / currentNote.length >= 2500d)
@@ -46,9 +49,9 @@
 
                 //note velocity more than 10k u/s, warning 5k
                 if (currentNote.pitchDelta == 0 && Math.Round(nextNote.position - (currentNote.position + currentNote.length), 3) > 0)
-                    if (Math.Abs(currentNote.pitchEnd - nextNote.pitchStart) / (nextNote.position - (currentNote.position + currentNote.length)) >= 10000d)
+                    if (Math.Abs(currentNote.pitchEnd - nextNote.pitchStart) / (nextNote.position - (currentNote.position + currentNote.length)) >= 5000d)
                         errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteVelocity, i, currentNote.position, Math.Abs(currentNote.pitchEnd - nextNote.pitchStart) / (nextNote.position - (currentNote.position + currentNote.length))));
-                    else if (Math.Abs(currentNote.pitchEnd - nextNote.pitchStart) / (nextNote.position - (currentNote.position + currentNote.length)) >= 5000d)
+                    else if (Math.Abs(currentNote.pitchEnd - nextNote.pitchStart) / (nextNote.position - (currentNote.position + currentNote.length)) >= 2500d)
                         errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.NoteVelocity, i, currentNote.position, Math.Abs(currentNote.pitchEnd - nextNote.pitchStart) / (nextNote.position - (currentNote.position + currentNote.length))));
 
 
@@ -100,6 +103,7 @@
         public enum ErrorType
         {
             NoteCount,
+            NoteLength,
             MapLength,
             HotStart,
             MaxLength,
