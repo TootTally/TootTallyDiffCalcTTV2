@@ -86,17 +86,23 @@ namespace TootTallyDiffCalcTTV2
                         aimEndurance /= endDecayMult;
                     if (tapEndurance > 1f)
                         tapEndurance /= endDecayMult;
+                    if (currentNote.position < 20f)
+                    {
+                        var decayTimes2 = endDecayMult * 2f;
+                        aimEndurance /= decayTimes2;
+                        tapEndurance /= decayTimes2;
+                    }
 
                     //Aim Calc
-                    aimStrain += Math.Sqrt(CalcAimStrain(nextNote, previousNote, ref currentDirection, ref previousDirection, weight, ref directionMultiplier, aimEndurance, MAX_TIME)) / 63f;
+                    aimStrain += Math.Sqrt(CalcAimStrain(nextNote, previousNote, ref currentDirection, ref previousDirection, weight, ref directionMultiplier, aimEndurance, MAX_TIME)) / 80f;
                     aimEndurance += CalcAimEndurance(nextNote, previousNote, weight, directionMultiplier, MAX_TIME);
 
                     //Tap Calc
-                    tapStrain += Math.Sqrt(CalcTapStrain(nextNote, previousNote, weight, tapEndurance)) / 140f;
+                    tapStrain += Math.Sqrt(CalcTapStrain(nextNote, previousNote, weight, tapEndurance)) / 150f;
                     tapEndurance += CalcTapEndurance(nextNote, previousNote, weight);
 
                     //Acc Calc
-                    accStrain += Math.Sqrt(CalcAccStrain(nextNote, previousNote, weight, directionMultiplier)) / 39f; // I can't figure that out yet
+                    accStrain += Math.Sqrt(CalcAccStrain(nextNote, previousNote, weight, directionMultiplier)) / 37f; // I can't figure that out yet
 
                     previousNote = nextNote;
 
@@ -147,7 +153,7 @@ namespace TootTallyDiffCalcTTV2
                 previousDirection = currentDirection; //update direction from slider
             }
             //return the weighted speed with all the multiplier
-            return speed * weight * directionMultiplier * endurance + 380f;
+            return speed * weight * directionMultiplier * endurance + 560f;
         }
 
         public static double CalcTapStrain(Note nextNote, Note previousNote, double weight, double endurance)
@@ -157,7 +163,7 @@ namespace TootTallyDiffCalcTTV2
             {
                 var timeDelta = nextNote.position - previousNote.position;
                 var strain = 15f / Math.Pow(timeDelta, 1.55f);
-                tapStrain = strain * weight * endurance + 840f;
+                tapStrain = strain * weight * endurance + 560f;
             }
             return tapStrain;
         }
@@ -169,9 +175,9 @@ namespace TootTallyDiffCalcTTV2
             double accStrain = 0d;
             if (nextNote.pitchDelta != 0)
             {
-                var sliderHeight = nextNote.pitchStart > SLIDER_BREAK_CONST ? Math.Pow(Math.Abs(nextNote.pitchDelta / 2f)/nextNote.length, 1.35f) : Math.Abs(nextNote.pitchDelta); //Promote height over speed
+                var sliderHeight = nextNote.pitchStart > SLIDER_BREAK_CONST ? Math.Pow(Math.Abs(nextNote.pitchDelta)/nextNote.length, 1.15f) : Math.Abs(nextNote.pitchDelta)/nextNote.length; //Promote height over speed
                 var strain = sliderHeight;
-                accStrain = strain * weight * directionMultiplier + 230f;
+                accStrain = strain * weight * directionMultiplier;
             }
 
             return accStrain;
@@ -184,15 +190,15 @@ namespace TootTallyDiffCalcTTV2
 
             if (!IsSlider(nextNote, previousNote))
             {
-                var distance = Math.Sqrt(MathF.Abs(nextNote.pitchStart - previousNote.pitchEnd));
+                var distance = MathF.Abs(nextNote.pitchStart - previousNote.pitchEnd);
                 var t = nextNote.position - (previousNote.position + previousNote.length);
-                enduranceAimStrain = distance / Math.Max(t, MAX_TIME) / 20f;
+                enduranceAimStrain = distance / Math.Max(t, MAX_TIME*2f) / 40f;
             }
 
             if (nextNote.pitchDelta >= SLIDER_BREAK_CONST) //Calc extra speed if its a slider
-                enduranceAimStrain += MathF.Abs(nextNote.pitchDelta * 7.5f) / nextNote.length / 8f; //This is equal to 0 if its not a slider*/
+                enduranceAimStrain += MathF.Abs(nextNote.pitchDelta * 7.5f) / nextNote.length / 4f; //This is equal to 0 if its not a slider*/
 
-            endurance += Math.Sqrt(enduranceAimStrain) / 60f;
+            endurance += Math.Sqrt(enduranceAimStrain) / 45f;
 
             return endurance * weight * directionalMultiplier;
         }
@@ -207,7 +213,7 @@ namespace TootTallyDiffCalcTTV2
             {
                 double timeDelta = nextNote.position - previousNote.position;
                 double enduranceTapStrain = 0.45f / Math.Pow(timeDelta, 1.45f);
-                endurance = Math.Sqrt(enduranceTapStrain) / 100f;
+                endurance = Math.Sqrt(enduranceTapStrain) / 40f;
             }
 
             return endurance * weight;
