@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Globalization;
 
 namespace TootTallyDiffCalcTTV2
 {
@@ -55,7 +54,7 @@ namespace TootTallyDiffCalcTTV2
                     var realCoefficient = (Math.Min(count - 1, 10) + champBonus) * 0.1f + 1f;
                     var noteScore = (int)Math.Floor(Math.Floor(length * 10f * 100f * realCoefficient) * 10f);
                     maxScore += noteScore;
-                    gameMaxScore += (int)Math.Floor(Math.Floor(length * 10f * 100f * 1.3f) * 10f);
+                    gameMaxScore += (int)Math.Floor(Math.Floor(length * 10f * 100f * 1.315f) * 10f);
                     notesDict[i].Add(new Note(count, BeatToSeconds2(n[0], newTempo), BeatToSeconds2(length, newTempo), n[2], n[3], n[4]));
                     count++;
                 }
