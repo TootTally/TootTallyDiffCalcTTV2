@@ -22,6 +22,8 @@
                 Note currentNote = chart.notesDict[2][i];
                 Note nextNote = chart.notesDict[2][i + 1];
 
+                bool isSlider = !(currentNote.pitchDelta == 0 && Math.Round(nextNote.position - (currentNote.position + currentNote.length), 3) > 0);
+
                 //ONLY APPLICABLE TO UPCOMING OR NEWLY RATED CHARTS
                 //notes starts within: error at shorter than 0.8s, warning at 1.25f
                 if (currentNote.position <= 0.8d)
@@ -46,39 +48,51 @@
                     errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.ShortNote, i, currentNote.position, length));
 
                 //sliders velocity more than 3k u/s, warning 2k, Notice at 1k
-                if (Math.Abs(currentNote.pitchDelta) >= 34.375d)
-                    if (Math.Abs(currentNote.pitchDelta) / currentNote.length >= 3000d)
-                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.SliderVelocity, i, currentNote.position, Math.Abs(currentNote.pitchDelta) / currentNote.length));
-                    else if (Math.Abs(currentNote.pitchDelta) / currentNote.length >= 2000d)
-                        errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.SliderVelocity, i, currentNote.position, Math.Abs(currentNote.pitchDelta) / currentNote.length));
-                    else if (Math.Abs(currentNote.pitchDelta) / currentNote.length >= 1000d)
-                        errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.SliderVelocity, i, currentNote.position, Math.Abs(currentNote.pitchDelta) / currentNote.length));
+                var pitchDelta = Math.Abs(currentNote.pitchDelta);
+                if (isSlider && pitchDelta >= 34.375d)
+                {
+                    var pitchVelocity = pitchDelta / currentNote.length;
+                    if (pitchVelocity >= 3000d)
+                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.SliderVelocity, i, currentNote.position, pitchVelocity));
+                    else if (pitchVelocity >= 2000d)
+                        errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.SliderVelocity, i, currentNote.position, pitchVelocity));
+                    else if (pitchVelocity >= 1000d)
+                        errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.SliderVelocity, i, currentNote.position, pitchVelocity));
+                }
+                else if (!isSlider)
+                {
+                    var noteDistance = nextNote.position - (currentNote.position + currentNote.length);
+                    var noteDelta = Math.Abs(currentNote.pitchEnd - nextNote.pitchStart);
+                    var noteVelocity = noteDelta / noteDistance;
 
-                //note velocity more than 6k u/s, warning 3k, notice at 1k
-                if (currentNote.pitchDelta == 0 && Math.Round(nextNote.position - (currentNote.position + currentNote.length), 3) > 0)
-                    if (Math.Abs(currentNote.pitchEnd - nextNote.pitchStart) / (nextNote.position - (currentNote.position + currentNote.length)) >= 6000d)
-                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteVelocity, i, currentNote.position, Math.Abs(currentNote.pitchEnd - nextNote.pitchStart) / (nextNote.position - (currentNote.position + currentNote.length))));
-                    else if (Math.Abs(currentNote.pitchEnd - nextNote.pitchStart) / (nextNote.position - (currentNote.position + currentNote.length)) >= 3000d)
-                        errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.NoteVelocity, i, currentNote.position, Math.Abs(currentNote.pitchEnd - nextNote.pitchStart) / (nextNote.position - (currentNote.position + currentNote.length))));
-                    else if (Math.Abs(currentNote.pitchEnd - nextNote.pitchStart) / (nextNote.position - (currentNote.position + currentNote.length)) >= 1000d)
-                        errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.NoteVelocity, i, currentNote.position, Math.Abs(currentNote.pitchEnd - nextNote.pitchStart) / (nextNote.position - (currentNote.position + currentNote.length))));
+                    //note velocity more than 6k u/s, warning 3k, notice at 1k
+                    if (noteVelocity >= 6000d)
+                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteVelocity, i, currentNote.position,   noteVelocity));
+                    else if (noteVelocity >= 3000d)                                                                   
+                        errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.NoteVelocity, i, currentNote.position, noteVelocity));
+                    else if (noteVelocity >= 1000d)                                                                    
+                        errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.NoteVelocity, i, currentNote.position, noteVelocity));
 
-                //note spacing smaller than: error at 2/60th, warning at 2/45th, notice at 2/25th
-                if (currentNote.pitchDelta == 0 && Math.Round(nextNote.position - (currentNote.position + currentNote.length), 3) > 0)
-                    if (nextNote.position - (currentNote.position + currentNote.length) <= 2d / 60d)
-                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.Spacing, i, currentNote.position, nextNote.position - (currentNote.position + currentNote.length)));
-                    else if (nextNote.position - (currentNote.position + currentNote.length) <= 2d / 45d)
-                        errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.Spacing, i, currentNote.position, nextNote.position - (currentNote.position + currentNote.length)));
-                    else if (nextNote.position - (currentNote.position + currentNote.length) <= 2d / 25d)
-                        errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.Spacing, i, currentNote.position, nextNote.position - (currentNote.position + currentNote.length)));
+                    //note spacing smaller than: error at 2/60th, warning at 2/45th, notice at 2/25th
+                    if (noteDistance <= 2d / 60d)
+                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.Spacing, i, currentNote.position, noteDistance));
+                    else if (noteDistance <= 2d / 45d)
+                        errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.Spacing, i, currentNote.position, noteDistance));
+                    else if (noteDistance <= 2d / 25d)
+                        errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.Spacing, i, currentNote.position, noteDistance));
+                }
 
                 //Pitch start out of play space
-                if (Math.Abs(nextNote.pitchStart) > 180d)
-                    errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteStartOutOfBound, i, currentNote.position, nextNote.pitchStart));
+                if (Math.Abs(currentNote.pitchStart) > 180d)
+                    errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteStartOutOfBound, i, currentNote.position, currentNote.pitchStart));
 
                 //Pitch end out of play space
-                if (nextNote.pitchStart != nextNote.pitchEnd && Math.Abs(nextNote.pitchEnd) > 180d)
-                    errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteEndOutOfBound, i, currentNote.position, nextNote.pitchEnd));
+                if (currentNote.pitchDelta != 0 && Math.Abs(currentNote.pitchEnd) > 180d)
+                    errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteEndOutOfBound, i, currentNote.position, currentNote.pitchEnd));
+
+                //If pitch delta is different than intended
+                if (Math.Round(currentNote.pitchDelta, 3) != Math.Round(currentNote.pitchEnd - currentNote.pitchStart, 3))
+                    errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteDelta, i, currentNote.position, (currentNote.pitchEnd - currentNote.pitchStart) - currentNote.pitchDelta));
             }
 
             return errors;
@@ -122,7 +136,7 @@
             NoteVelocity,
             NoteStartOutOfBound,
             NoteEndOutOfBound,
-
+            NoteDelta
         }
     }
 }

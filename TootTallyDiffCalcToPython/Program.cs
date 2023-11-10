@@ -8,8 +8,8 @@ namespace TootTallyDiffCalcTTV2
     {
         #region hellooffbeatwitch
         public static List<Chart> chartList;
-        public const string VERSION_LABEL = "2.3.0";
-        public const string BUILD_DATE = "10022023";
+        public const string VERSION_LABEL = "2.5.0";
+        public const string BUILD_DATE = "11092023";
         public static StreamWriter fileWriter;
 
         public static void Main()
@@ -169,9 +169,9 @@ namespace TootTallyDiffCalcTTV2
             ChartPerformances.DataVectorAnalytics tapAnalytics = chart.performances.tapAnalyticsDict[speedIndex];
             ChartPerformances.DataVectorAnalytics accAnalytics = chart.performances.accAnalyticsDict[speedIndex];
             WriteToConsoleAndFile($"SPEED: {Utils.GAME_SPEED[speedIndex]:0.00}x rated {chart.GetStarRating(Utils.GAME_SPEED[speedIndex]):0.0000}");
-            WriteToConsoleAndFile($"  aim: {aimAnalytics.perfWeightedAverage:0.0000} std: {aimAnalytics.standardDeviation:0.0000} mul: {aimAnalytics.multiplier:0.0000} max: {aimAnalytics.perfMax:0.0000}");
-            WriteToConsoleAndFile($"  tap: {tapAnalytics.perfWeightedAverage:0.0000} std: {tapAnalytics.standardDeviation:0.0000} mul: {tapAnalytics.multiplier:0.0000} max: {tapAnalytics.perfMax:0.0000}");
-            WriteToConsoleAndFile($"  acc: {accAnalytics.perfWeightedAverage:0.0000} std: {accAnalytics.standardDeviation:0.0000} mul: {accAnalytics.multiplier:0.0000} max: {accAnalytics.perfMax:0.0000}");
+            WriteToConsoleAndFile($"  aim: {aimAnalytics.perfWeightedAverage:0.0000} max: {aimAnalytics.perfMax:0.0000}");
+            WriteToConsoleAndFile($"  tap: {tapAnalytics.perfWeightedAverage:0.0000} max: {tapAnalytics.perfMax:0.0000}");
+            WriteToConsoleAndFile($"  acc: {accAnalytics.perfWeightedAverage:0.0000} max: {accAnalytics.perfMax:0.0000}");
             WriteToConsoleAndFile("--------------------------------------------");
         }
 

@@ -50,9 +50,9 @@ namespace TootTallyDiffCalcTTV2
                     if (length <= 0)//minLength only applies if the note is less or equal to 0 beats, else it keeps its "lower than minimum" length
                         length = 0.015f;
                     //Taken from HighscoreAccuracy https://github.com/emmett-shark/HighscoreAccuracy/blob/3f4be49f4ef31b8df1533511c7727bf7813c7773/Utils.cs#L30C1-L30C1
-                    var champBonus = count - 1 > 23 ? 1.5f : 0;
-                    var realCoefficient = (Math.Min(count - 1, 10) + champBonus) * 0.1f + 1f;
-                    var noteScore = (int)Math.Floor(Math.Floor(length * 10f * 100f * realCoefficient) * 10f);
+                    var champBonus = count - 1 > 23 ? 1.5m : 0m;
+                    var realCoefficient = (Math.Min(count - 1, 10) + champBonus) * 0.1m + 1m;
+                    var noteScore = (int)Math.Floor((decimal)length * 10 * 100 * realCoefficient) * 10;
                     maxScore += noteScore;
                     gameMaxScore += (int)Math.Floor(Math.Floor(length * 10f * 100f * 1.315f) * 10f);
                     notesDict[i].Add(new Note(count, BeatToSeconds2(n[0], newTempo), BeatToSeconds2(length, newTempo), n[2], n[3], n[4]));
@@ -76,19 +76,19 @@ namespace TootTallyDiffCalcTTV2
         }
 
         // between 0.5f to 2f
-        public double GetBaseTT(float speed) => Utils.CalculateBaseTT(GetDiffRating(Math.Clamp(speed, 0.5f, 2f)));
+        public float GetBaseTT(float speed) => Utils.CalculateBaseTT(GetDiffRating(Math.Clamp(speed, 0.5f, 2f)));
 
         //Returns the lerped star rating
-        public double GetDiffRating(float speed) => performances.GetDiffRating(Math.Clamp(speed, 0.5f, 2f));
-        public double GetLerpedStarRating(float speed) => performances.GetDiffRating(Math.Clamp(speed, 0.5f, 2f));
+        public float GetDiffRating(float speed) => performances.GetDiffRating(Math.Clamp(speed, 0.5f, 2f));
+        public float GetLerpedStarRating(float speed) => performances.GetDiffRating(Math.Clamp(speed, 0.5f, 2f));
 
-        public double GetAimPerformance(float speed) => performances.aimAnalyticsDict[SpeedToIndex(speed)].perfWeightedAverage;
-        public double GetTapPerformance(float speed) => performances.tapAnalyticsDict[SpeedToIndex(speed)].perfWeightedAverage;
-        public double GetAccPerformance(float speed) => performances.accAnalyticsDict[SpeedToIndex(speed)].perfWeightedAverage;
+        public float GetAimPerformance(float speed) => performances.aimAnalyticsDict[SpeedToIndex(speed)].perfWeightedAverage;
+        public float GetTapPerformance(float speed) => performances.tapAnalyticsDict[SpeedToIndex(speed)].perfWeightedAverage;
+        public float GetAccPerformance(float speed) => performances.accAnalyticsDict[SpeedToIndex(speed)].perfWeightedAverage;
 
-        public double GetStarRating(float speed) => performances.starRatingDict[SpeedToIndex(speed)];
+        public float GetStarRating(float speed) => performances.starRatingDict[SpeedToIndex(speed)];
 
-        public float SpeedToIndex(float speed) => (int)((Math.Clamp(speed, 0.5f, 2f) - 0.5f) / .25f);
+        public int SpeedToIndex(float speed) => (int)((Math.Clamp(speed, 0.5f, 2f) - 0.5f) / .25f);
 
         public class Lyrics
         {
@@ -96,7 +96,7 @@ namespace TootTallyDiffCalcTTV2
             public string text;
         }
 
-        public static float BeatToSeconds2(float beat, float bpm) => (60f / bpm) * beat;
+        public static float BeatToSeconds2(float beat, float bpm) => 60f / bpm * beat;
 
     }
 }
