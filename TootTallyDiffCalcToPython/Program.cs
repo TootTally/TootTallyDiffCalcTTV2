@@ -8,8 +8,8 @@ namespace TootTallyDiffCalcTTV2
     {
         #region hellooffbeatwitch
         public static List<Chart> chartList;
-        public const string VERSION_LABEL = "2.5.0";
-        public const string BUILD_DATE = "11092023";
+        public const string VERSION_LABEL = "2.5.2";
+        public const string BUILD_DATE = "11142023";
         public static StreamWriter fileWriter;
 
         public static void Main()

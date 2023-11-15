@@ -52,9 +52,9 @@ namespace TootTallyDiffCalcTTV2
         public void CalculatePerformances(int speedIndex)
         {
             var noteList = _chart.notesDict[speedIndex];
-            var aimEndurance = .5f;
-            var tapEndurance = .5f;
-            var accEndurance = .5f;
+            var aimEndurance = 0f;
+            var tapEndurance = 0f;
+            var accEndurance = 0f;
 
             var spanList = CollectionsMarshal.AsSpan(noteList);
             var firstNotePosition = spanList[0].position;
@@ -64,90 +64,93 @@ namespace TootTallyDiffCalcTTV2
                 var previousNote = currentNote;
 
                 var lengthSum = 0f;
-                for (int j = i; j < i + 10 && j < spanList.Length; j++)
-                    lengthSum += spanList[j].length * weights[j - i];
-
-                var timeMinute = (currentNote.position - firstNotePosition) / 60f;
-                var timeMultiplier = MathF.Max(((1f + timeMinute / 50f) * (1f - MathF.Pow(MathF.E, -.6f * timeMinute + .5f))) + .33f, .33f);
+                for (int j = i; j > i - 10 && j > 0; j--)
+                    lengthSum += spanList[j].length * weights[i - j];
 
                 var aimStrain = 0f;
                 var tapStrain = 0f;
                 var accStrain = 0f;
 
-                var increaseDecay = currentNote.position - firstNotePosition < 30f;
+                var increaseDecay = (currentNote.position - firstNotePosition) * Utils.GAME_SPEED[speedIndex] < 30f;
                 ComputeEnduranceDecay(ref aimEndurance, increaseDecay);
                 ComputeEnduranceDecay(ref tapEndurance, increaseDecay);
                 ComputeEnduranceDecay(ref accEndurance, increaseDecay);
 
-                for (int j = i + 1; j < spanList.Length && j < i + 10 && spanList[j].position - (currentNote.position + currentNote.length) <= 10; j++)
+                for (int j = i - 1; j > 0 && j > i - 10 && currentNote.position - spanList[j].position <= 8; j--)
                 {
                     var nextNote = spanList[j];
                     var MAX_TIME = previousNote.length * .66f;
-                    var weight = weights[j - i - 1];
+                    var weight = weights[i - j - 1];
 
                     //Aim Calc
-                    aimStrain += CalcAimStrain(nextNote, previousNote, weight, aimEndurance, MAX_TIME) / 70f;
-                    aimEndurance += CalcAimEndurance(nextNote, previousNote, weight, MAX_TIME);
+                    aimStrain += MathF.Sqrt(CalcAimStrain(previousNote, nextNote, weight, MAX_TIME)) / 26f;
+                    aimEndurance += CalcAimEndurance(previousNote, nextNote, weight, MAX_TIME);
 
                     //Tap Calc
-                    tapStrain += CalcTapStrain(nextNote, previousNote, weight, tapEndurance) / 40f;
-                    tapEndurance += CalcTapEndurance(nextNote, previousNote, weight);
+                    tapStrain += MathF.Sqrt(CalcTapStrain(previousNote, nextNote, weight)) / 13f;
+                    tapEndurance += CalcTapEndurance(previousNote, nextNote, weight);
 
                     //Acc Calc
-                    accStrain += CalcAccStrain(nextNote, weight, accEndurance) / 30f;
-                    accEndurance += CalcAccEndurance(nextNote, weight);
+                    accStrain += MathF.Sqrt(CalcAccStrain(previousNote, weight)) / 15f;
+                    accEndurance += CalcAccEndurance(previousNote, weight);
 
                     previousNote = nextNote;
 
                 }
-                aimPerfDict[speedIndex][i] = new DataVector(currentNote.position, MathF.Sqrt(aimStrain * timeMultiplier), lengthSum);
-                tapPerfDict[speedIndex][i] = new DataVector(currentNote.position, MathF.Sqrt(tapStrain * timeMultiplier), lengthSum);
-                if (accStrain != 0)
-                    accPerfDict[speedIndex][i] = new DataVector(currentNote.position, MathF.Sqrt(accStrain * timeMultiplier), lengthSum);
+
+                aimPerfDict[speedIndex][i] = new DataVector(currentNote.position, aimStrain + aimEndurance, lengthSum);
+                tapPerfDict[speedIndex][i] = new DataVector(currentNote.position, tapStrain + tapEndurance, lengthSum);
+                accPerfDict[speedIndex][i] = new DataVector(currentNote.position, accStrain + accEndurance, lengthSum);
             }
         }
 
         public static void ComputeEnduranceDecay(ref float endurance, bool increaseDecay)
         {
-            if (endurance > 1f)
-                endurance /= ENDURANCE_DECAY * (increaseDecay ? 1.125f : 1f);
-            else if (endurance > .5f && increaseDecay)
-                endurance /= ENDURANCE_DECAY * 1.1f;
+            if (endurance > 0f)
+            {
+                var enduranceDecay = ENDURANCE_DECAY;
+                if (increaseDecay)
+                    enduranceDecay += endurance >= 1f ? .3f : .2f;
+                endurance /= enduranceDecay;
+            }
         }
 
-        public static float CalcAimStrain(Note nextNote, Note previousNote, float weight, float endurance, float MAX_TIME)
+        public static float CalcAimStrain(Note nextNote, Note previousNote, float weight, float MAX_TIME)
         {
             if (IsSlider(nextNote, previousNote)) return 0;
 
             //Calc the space between two notes if they aren't connected sliders
-            var distance = MathF.Abs(nextNote.pitchStart - previousNote.pitchEnd);
+            var distance = MathF.Pow(MathF.Abs(nextNote.pitchStart - previousNote.pitchEnd), .9f);
             if (nextNote.pitchDelta != 0)
-                distance *= .45f;
+                distance *= .35f;
 
             var t = nextNote.position - (previousNote.position + previousNote.length);
             float speed = distance / MathF.Max(t, MAX_TIME);
 
             //return the weighted speed with all the multiplier
-            return speed * weight * endurance;
+            return speed * weight;
         }
 
-        public static float CalcTapStrain(Note nextNote, Note previousNote, float weight, float endurance)
+        public static float CalcTapStrain(Note nextNote, Note previousNote, float weight)
         {
             if (IsSlider(nextNote, previousNote)) return 0;
 
             var timeDelta = nextNote.position - previousNote.position;
-            var strain = 6f / MathF.Pow(timeDelta, 1.08f);
+            var strain = 3f / MathF.Pow(timeDelta, 1.15f);
 
-            return strain * weight * endurance;
+            return strain * weight;
         }
 
-        public static float CalcAccStrain(Note nextNote, float weight, float endurance)
+        public static float CalcAccStrain(Note nextNote, float weight)
         {
             if (nextNote.pitchDelta == 0) return 0;
 
             var strain = MathF.Abs(nextNote.pitchDelta) / nextNote.length;
+            if (nextNote.pitchDelta <= 34.375f)
+                strain *= .5f;
 
-            return strain * weight * endurance;
+
+            return strain * weight;
         }
 
         public static float CalcAimEndurance(Note nextNote, Note previousNote, float weight, float MAX_TIME)
@@ -156,7 +159,7 @@ namespace TootTallyDiffCalcTTV2
 
             var distance = MathF.Abs(nextNote.pitchStart - previousNote.pitchEnd);
             var t = nextNote.position - (previousNote.position + previousNote.length);
-            float endurance = distance / MathF.Max(t, MAX_TIME * 3f) / 6200f;
+            float endurance = distance / MathF.Max(t, MAX_TIME * 3f) / 8000f;
 
             return endurance * weight;
         }
@@ -169,7 +172,7 @@ namespace TootTallyDiffCalcTTV2
             if (IsSlider(nextNote, previousNote)) return 0;
 
             float timeDelta = nextNote.position - previousNote.position;
-            float endurance = 0.45f / MathF.Pow(timeDelta, 1.1f) / 55f;
+            float endurance = 0.45f / MathF.Pow(timeDelta, 1.1f) / 80f;
 
             return endurance * weight;
         }
@@ -178,7 +181,9 @@ namespace TootTallyDiffCalcTTV2
         {
             if (nextNote.pitchDelta == 0) return 0;
 
-            var endurance = MathF.Abs(nextNote.pitchDelta * .5f) / nextNote.length / 5000f; //This is equal to 0 if its not a slider
+            var endurance = MathF.Abs(nextNote.pitchDelta * .5f) / nextNote.length / 1200f; //This is equal to 0 if its not a slider
+            if (nextNote.pitchDelta <= 34.375f)
+                endurance *= .5f;
 
             return endurance * weight;
         }
@@ -202,9 +207,9 @@ namespace TootTallyDiffCalcTTV2
                 var aimPerc = aimRating / totalRating;
                 var tapPerc = tapRating / totalRating;
                 var accPerc = accRating / totalRating;
-                var aimWeight = (aimPerc + .16f) * 1.2f;
-                var tapWeight = (tapPerc + .16f) * 1.35f;
-                var accWeight = (accPerc + .16f) * 1.1f;
+                var aimWeight = (aimPerc + .5f) * 1.2f;
+                var tapWeight = (tapPerc + .5f) * 1.15f;
+                var accWeight = (accPerc + .5f) * 1.1f;
                 var totalWeight = aimWeight + tapWeight + accWeight;
                 starRatingDict[gamespeed] = ((aimRating * aimWeight) + (tapRating * tapWeight) + (accRating * accWeight)) / totalWeight;
             }
