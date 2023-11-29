@@ -41,7 +41,7 @@ namespace TootTallyDiffCalcTTV2
                     WriteToConsoleAndFile($"Total calculation time took: {stopwatch.Elapsed.TotalSeconds}s for {chartList.Count} charts and {chartList.Count * 7} diffs");
                     for (int i = 0; i < chartList.Count; i++)
                     {
-                        OutputErrors(chartList[i]);
+                        //OutputErrors(chartList[i]);
                     }
                     Console.ForegroundColor = ConsoleColor.Red;
                     WriteToConsoleAndFile("=================================UNRATABLE CHARTS=================================");
