@@ -16,17 +16,18 @@
             if (lastNote.position + lastNote.length - chart.notesDict[2][0].position <= 10f)
                 errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.MapLength, chart.notesDict[2].Count - 1, lastNote.position + lastNote.length, lastNote.position + lastNote.length));
 
+            Note previousNote = null;
+            bool wasSlider = false;
             for (int i = 0; i < chart.notesDict[2].Count - 1; i++)
             {
-
                 Note currentNote = chart.notesDict[2][i];
                 Note nextNote = chart.notesDict[2][i + 1];
 
-                bool isSlider = !(currentNote.pitchDelta == 0 && Math.Round(nextNote.position - (currentNote.position + currentNote.length), 3) > 0);
+                bool isSlider = !(Math.Round(nextNote.position - (currentNote.position + currentNote.length), 3) > 0);
 
                 //ONLY APPLICABLE TO UPCOMING OR NEWLY RATED CHARTS
                 //notes starts within: error at shorter than 0.8s, warning at 1.25f
-                if (currentNote.position <= 0.8d)
+                if (currentNote.position <= 0.8f)
                     errors.Add(new RatingError(ErrorLevel.Error, ErrorType.HotStart, i, currentNote.position, currentNote.position));
                 else if (currentNote.position <= 1.25f)
                     errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.HotStart, i, currentNote.position, currentNote.position));
@@ -37,11 +38,11 @@
                     length += chart.notesDict[2][j].length;
 
                 //notes shorter than: error at 4.5454s, warning at 4.4s, notice at 4s
-                if (length >= 4.5454d)
+                if (length >= 4.5454f)
                     errors.Add(new RatingError(ErrorLevel.Error, ErrorType.LongNote, i, currentNote.position, length));
-                else if (length > 4.4d)
+                else if (length > 4.4f)
                     errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.LongNote, i, currentNote.position, length));
-                else if (length > 4d)
+                else if (length > 4f)
                     errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.LongNote, i, currentNote.position, length));
 
                 if (currentNote.length < 0.001f)
@@ -49,14 +50,14 @@
 
                 //sliders velocity more than 3k u/s, warning 2k, Notice at 1k
                 var pitchDelta = Math.Abs(currentNote.pitchDelta);
-                if (isSlider && pitchDelta >= 34.375d)
+                if (isSlider && pitchDelta >= 34.375f)
                 {
                     var pitchVelocity = pitchDelta / currentNote.length;
-                    if (pitchVelocity >= 3000d)
+                    if (pitchVelocity >= 3000f)
                         errors.Add(new RatingError(ErrorLevel.Error, ErrorType.SliderVelocity, i, currentNote.position, pitchVelocity));
-                    else if (pitchVelocity >= 2000d)
+                    else if (pitchVelocity >= 2000f)
                         errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.SliderVelocity, i, currentNote.position, pitchVelocity));
-                    else if (pitchVelocity >= 1000d)
+                    else if (pitchVelocity >= 1000f)
                         errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.SliderVelocity, i, currentNote.position, pitchVelocity));
                 }
                 else if (!isSlider)
@@ -66,21 +67,30 @@
                     var noteVelocity = noteDelta / noteDistance;
 
                     //note velocity more than 6k u/s, warning 3k, notice at 1k
-                    if (noteVelocity >= 6000d)
-                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteVelocity, i, currentNote.position,   noteVelocity));
-                    else if (noteVelocity >= 3000d)                                                                   
+                    if (noteVelocity >= 7500f)
+                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteVelocity, i, currentNote.position, noteVelocity));
+                    else if (noteVelocity >= 4500f)
                         errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.NoteVelocity, i, currentNote.position, noteVelocity));
-                    else if (noteVelocity >= 1000d)                                                                    
+                    else if (noteVelocity >= 3000f)
                         errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.NoteVelocity, i, currentNote.position, noteVelocity));
 
                     //note spacing smaller than: error at 2/60th, warning at 2/45th, notice at 2/25th
-                    if (noteDistance <= 2d / 60d)
+                    if (noteDistance <= 2d / 60f)
                         errors.Add(new RatingError(ErrorLevel.Error, ErrorType.Spacing, i, currentNote.position, noteDistance));
-                    else if (noteDistance <= 2d / 45d)
+                    else if (noteDistance <= 2d / 45f)
                         errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.Spacing, i, currentNote.position, noteDistance));
-                    else if (noteDistance <= 2d / 25d)
+                    else if (noteDistance <= 2d / 25f)
                         errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.Spacing, i, currentNote.position, noteDistance));
                 }
+
+                if (!(wasSlider && isSlider))
+                {
+                    if (previousNote != null && wasSlider && previousNote.length <= .04f)
+                        errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.SliderHead, i, currentNote.position, previousNote.length));
+                    if (isSlider && nextNote.length <= .04f)
+                        errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.SliderTail, i, currentNote.position, nextNote.length));
+                }
+
 
                 //Pitch start out of play space
                 if (Math.Abs(currentNote.pitchStart) > 180d)
@@ -93,6 +103,9 @@
                 //If pitch delta is different than intended
                 if (Math.Round(currentNote.pitchDelta, 3) != Math.Round(currentNote.pitchEnd - currentNote.pitchStart, 3))
                     errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteDelta, i, currentNote.position, (currentNote.pitchEnd - currentNote.pitchStart) - currentNote.pitchDelta));
+
+                previousNote = currentNote;
+                wasSlider = isSlider;
             }
 
             return errors;
@@ -136,7 +149,9 @@
             NoteVelocity,
             NoteStartOutOfBound,
             NoteEndOutOfBound,
-            NoteDelta
+            NoteDelta,
+            SliderHead,
+            SliderTail,
         }
     }
 }

@@ -81,24 +81,24 @@ namespace TootTallyDiffCalcTTV2
                 {
                     var nextNote = noteList[j];
                     var previousNote = noteList[j + 1];
-                    var MAX_TIME = previousNote.length * .66f;
+                    var MAX_TIME = previousNote.length * .34f;
                     var weight = weights[i - j - 1];
 
                     if (!IsSlider(previousNote, nextNote))
                     {
                         //Aim Calc
-                        aimStrain += MathF.Sqrt(CalcAimStrain(previousNote, nextNote, weight, MAX_TIME)) / 26f;
+                        aimStrain += MathF.Sqrt(CalcAimStrain(previousNote, nextNote, weight, MAX_TIME)) / 24f;
                         aimEndurance += CalcAimEndurance(previousNote, nextNote, weight, MAX_TIME);
 
                         //Tap Calc
-                        tapStrain += MathF.Sqrt(CalcTapStrain(previousNote, nextNote, weight)) / 13f;
+                        tapStrain += MathF.Sqrt(CalcTapStrain(previousNote, nextNote, weight)) / 10f;
                         tapEndurance += CalcTapEndurance(previousNote, nextNote, weight);
                     }
                     
                     if (previousNote.pitchDelta != 0)
                     {
                         //Acc Calc
-                        accStrain += MathF.Sqrt(CalcAccStrain(previousNote, weight)) / 15f;
+                        accStrain += MathF.Sqrt(CalcAccStrain(previousNote, weight)) / 12f;
                         accEndurance += CalcAccEndurance(previousNote, weight);
                     }
                 }
@@ -133,7 +133,7 @@ namespace TootTallyDiffCalcTTV2
         }
 
         public static float CalcTapStrain(Note nextNote, Note previousNote, float weight) =>
-            3f / MathF.Pow(nextNote.position - previousNote.position, 1.15f) * weight;
+            2f / MathF.Pow(nextNote.position - previousNote.position, 1.2f) * weight;
 
         public static float CalcAccStrain(Note nextNote, float weight)
         {
@@ -146,7 +146,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static float CalcAimEndurance(Note nextNote, Note previousNote, float weight, float MAX_TIME)
         {
-            float endurance = MathF.Abs(nextNote.pitchStart - previousNote.pitchEnd) / MathF.Max(nextNote.position - (previousNote.position + previousNote.length), MAX_TIME * 3f) / 8000f;
+            float endurance = MathF.Abs(nextNote.pitchStart - previousNote.pitchEnd) / MathF.Max(nextNote.position - (previousNote.position + previousNote.length), MAX_TIME * 3f) / 9000f;
             return endurance * weight;
         }
 
@@ -154,13 +154,13 @@ namespace TootTallyDiffCalcTTV2
 
         public static float CalcTapEndurance(Note nextNote, Note previousNote, float weight)
         {
-            float endurance = 0.45f / MathF.Pow(nextNote.position - previousNote.position, 1.1f) / 80f;
+            float endurance = 0.45f / MathF.Pow(nextNote.position - previousNote.position, 1.1f) / 90f;
             return endurance * weight;
         }
 
         public static float CalcAccEndurance(Note nextNote, float weight)
         {
-            var endurance = MathF.Abs(nextNote.pitchDelta * .5f) / nextNote.length / 1200f; //This is equal to 0 if its not a slider
+            var endurance = MathF.Abs(nextNote.pitchDelta * .5f) / nextNote.length / 1300f; //This is equal to 0 if its not a slider
             if (nextNote.pitchDelta <= 34.375f)
                 endurance *= .5f;
 
