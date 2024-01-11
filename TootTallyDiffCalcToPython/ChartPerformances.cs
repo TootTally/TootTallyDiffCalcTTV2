@@ -54,12 +54,13 @@ namespace TootTallyDiffCalcTTV2
         }
 
         public const float ENDURANCE_DECAY = 1.004f;
-        public const float AIM_DIV = 33;
-        public const float TAP_DIV = 22;
+        public const float AIM_DIV = 25;
+        public const float TAP_DIV = 20;
         public const float ACC_DIV = 25;
-        public const float AIM_END = 1500;
+        public const float AIM_END = 1250;
         public const float TAP_END = 50;
-        public const float ACC_END = 6000;
+        public const float ACC_END = 5000;
+        public const float MAX_DIST = 4.5f;
 
         public void CalculatePerformances(int speedIndex)
         {
@@ -67,7 +68,6 @@ namespace TootTallyDiffCalcTTV2
             var aimEndurance = 0f;
             var tapEndurance = 0f;
             var accEndurance = 0f;
-
             for (int i = 0; i < noteList.Count - 1; i++) //Main Forward Loop
             {
                 var currentNote = noteList[i];
@@ -75,18 +75,21 @@ namespace TootTallyDiffCalcTTV2
                 var aimStrain = 0f;
                 var tapStrain = 0f;
                 var accStrain = 0f;
+                if (i > 0)
+                {
+                    var distanceFromLastNote = currentNote.position - noteList[i - 1].position;
+                    ComputeEnduranceDecay(ref aimEndurance, distanceFromLastNote);
+                    ComputeEnduranceDecay(ref tapEndurance, distanceFromLastNote);
+                    ComputeEnduranceDecay(ref accEndurance, distanceFromLastNote);
+                }
 
-                ComputeEnduranceDecay(ref aimEndurance);
-                ComputeEnduranceDecay(ref tapEndurance);
-                ComputeEnduranceDecay(ref accEndurance);
-
-                for (int j = i - 1; j > 0 && j > i - 10 && MathF.Abs(currentNote.position - noteList[j].position) <= 4.5f; j--)
+                for (int j = i - 1; j > 0 && j > i - 10 && MathF.Abs(currentNote.position - noteList[j].position) <= MAX_DIST; j--)
                 {
                     var prevNote = noteList[j];
                     var nextNote = noteList[j + 1];
                     var weight = weights[i - j - 1];
-                    lengthSum += MathF.Sqrt(prevNote.length) * weight;
                     var deltaTime = nextNote.position - (prevNote.position + prevNote.length);
+                    lengthSum += MathF.Sqrt(prevNote.length) * weight;
                     if (!IsSlider(deltaTime))
                     {
                         deltaTime += prevNote.length * .4f;
@@ -121,10 +124,10 @@ namespace TootTallyDiffCalcTTV2
         }
         public static bool IsSlider(float deltaTime) => !(MathF.Round(deltaTime, 3) > 0);
 
-        public static void ComputeEnduranceDecay(ref float endurance)
+        public static void ComputeEnduranceDecay(ref float endurance, float distanceFromLastNote)
         {
             if (endurance > 1f)
-                endurance /= ENDURANCE_DECAY;
+                endurance /= ENDURANCE_DECAY + MathF.Pow(.2f * MathF.Sqrt(distanceFromLastNote), MathF.E);
         }
 
         public static float CalcNerfedEndurance(float endurance)
@@ -142,7 +145,7 @@ namespace TootTallyDiffCalcTTV2
             if (deltaTime > 1)
                 return distance / MathF.Sqrt(deltaTime) * weight;
             else
-                return distance / MathF.Pow(deltaTime, 1.35f) * weight;
+                return distance / MathF.Pow(deltaTime, 1.25f) * weight;
         }
 
         public static float CalcTapStrain(float tapDelta, float weight)
@@ -258,8 +261,8 @@ namespace TootTallyDiffCalcTTV2
         public const float TAP_WEIGHT = 1.15f;
         public const float ACC_WEIGHT = 1.1f;
 
-        public static readonly float[] HDWeights = { .28f, .08f, .32f };
-        public static readonly float[] FLWeights = { .35f, .12f, .08f };
+        public static readonly float[] HDWeights = { .11f, .04f, .19f };
+        public static readonly float[] FLWeights = { .18f, .04f, .08f };
 
         public float GetDynamicDiffRating(float percent, float gamespeed, string[] modifiers = null)
         {
@@ -287,9 +290,9 @@ namespace TootTallyDiffCalcTTV2
                     accPow += FLWeights[2];
                 }
 
-                aimRating = MathF.Pow(aimRating, aimPow);
-                tapRating = MathF.Pow(tapRating, tapPow);
-                accRating = MathF.Pow(accRating, accPow);
+                aimRating = MathF.Pow(aimRating + 1f, aimPow) - 1f;
+                tapRating = MathF.Pow(tapRating + 1f, tapPow) - 1f;
+                accRating = MathF.Pow(accRating + 1f, accPow) - 1f;
             }
             var totalRating = aimRating + tapRating + accRating;
             var aimPerc = aimRating / totalRating;

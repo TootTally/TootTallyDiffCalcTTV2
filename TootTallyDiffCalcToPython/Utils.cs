@@ -49,19 +49,20 @@ namespace TootTallyDiffCalcTTV2
             return scoreTT;
         }
 
+        public const float c = 0.028091281f;
+        public const float b = 6f;
+
         //https://www.desmos.com/calculator/x7c0zutgsn
         public static float CalculateScoreTT(float[] diffRatings, float replaySpeed, float percent)
         {
             var baseTT = CalculateBaseTT(LerpDiff(diffRatings, replaySpeed));
 
             float scoreTT;
-            if (percent < 0.6f)
-                scoreTT = 21.433f * FastPow(percent, 6) * baseTT;
-            else if (percent < 0.98f)
-                scoreTT = ((0.028091281f * MathF.Pow(MathF.E, 6f * percent)) - 0.028091281f) * baseTT;
+            if (percent < 0.98f)
+                scoreTT = ((c * MathF.Pow(MathF.E, b * percent)) - c) * baseTT;//y = (0.28091281 * e^6x - 0.028091281) * b
             else
                 scoreTT = FastPow(9.2f * percent - 7.43037117f, 5) * baseTT;
-            //y = (0.28091281 * e^6x - 0.028091281) * b
+            
 
             return scoreTT;
         }
