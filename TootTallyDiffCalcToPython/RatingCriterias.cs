@@ -85,8 +85,10 @@
 
                 if (!(wasSlider && isSlider))
                 {
+                    //Slider Head is shorter than 0.04s 
                     if (previousNote != null && wasSlider && previousNote.length <= .04f)
                         errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.SliderHead, i, currentNote.position, previousNote.length));
+                    //Slider Tail is shorter than 0.04s
                     if (isSlider && nextNote.length <= .04f)
                         errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.SliderTail, i, currentNote.position, nextNote.length));
                 }

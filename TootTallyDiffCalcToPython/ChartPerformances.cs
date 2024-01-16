@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace TootTallyDiffCalcTTV2
 {
@@ -54,10 +55,10 @@ namespace TootTallyDiffCalcTTV2
         }
 
         public const float ENDURANCE_DECAY = 1.004f;
-        public const float AIM_DIV = 25;
+        public const float AIM_DIV = 27;
         public const float TAP_DIV = 20;
         public const float ACC_DIV = 25;
-        public const float AIM_END = 1250;
+        public const float AIM_END = 1350;
         public const float TAP_END = 50;
         public const float ACC_END = 5000;
         public const float MAX_DIST = 4.5f;
@@ -85,10 +86,15 @@ namespace TootTallyDiffCalcTTV2
 
                 for (int j = i - 1; j > 0 && j > i - 10 && MathF.Abs(currentNote.position - noteList[j].position) <= MAX_DIST; j--)
                 {
+
                     var prevNote = noteList[j];
                     var nextNote = noteList[j + 1];
+                    if (prevNote.position == nextNote.position) continue;
+
                     var weight = weights[i - j - 1];
                     var deltaTime = nextNote.position - (prevNote.position + prevNote.length);
+
+
                     lengthSum += MathF.Sqrt(prevNote.length) * weight;
                     if (!IsSlider(deltaTime))
                     {
@@ -115,6 +121,7 @@ namespace TootTallyDiffCalcTTV2
                         accStrain += MathF.Sqrt(CalcAccStrain(prevNote, slideDelta, weight)) / ACC_DIV;
                         accEndurance += CalcAccEndurance(prevNote, slideDelta, weight);
                     }
+
                 }
 
                 aimPerfDict[speedIndex][i].SetValues(currentNote.position, aimStrain + CalcNerfedEndurance(aimEndurance), lengthSum);
@@ -159,7 +166,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static float CalcAccStrain(Note prevNote, float slideDelta, float weight)
         {
-            if (prevNote.pitchDelta <= 34.375f)
+            if (MathF.Abs(prevNote.pitchDelta) <= 34.375f)
                 slideDelta *= .25f;
 
             if (prevNote.length > 1)

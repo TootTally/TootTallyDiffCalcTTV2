@@ -44,7 +44,7 @@ namespace TootTallyDiffCalcTTV2
                 gameMaxScore = 0;
                 notesDict[i] = new List<Note>(notes.Length);
 
-                foreach (float[] n in notes)
+                foreach (float[] n in notes.OrderBy(x => x[0]))
                 {
                     float length = n[1];
                     if (length <= 0)//minLength only applies if the note is less or equal to 0 beats, else it keeps its "lower than minimum" length
@@ -80,6 +80,9 @@ namespace TootTallyDiffCalcTTV2
 
         //Returns the lerped star rating
         public float GetDiffRating(float speed) => performances.GetDiffRating(Math.Clamp(speed, 0.5f, 2f));
+
+        public float GetDynamicDiffRating(float speed, float percent, string[] modifiers = null) => performances.GetDynamicDiffRating(percent, speed, modifiers);
+
         public float GetLerpedStarRating(float speed) => performances.GetDiffRating(Math.Clamp(speed, 0.5f, 2f));
 
         public float GetAimPerformance(float speed) => performances.aimAnalyticsDict[SpeedToIndex(speed)].perfWeightedAverage;
