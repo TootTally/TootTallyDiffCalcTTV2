@@ -10,6 +10,20 @@ namespace TootTallyDiffCalcTTV2
         public static void AddChartToList(string path) =>
             _allChartList.Add(LoadChart(path));
 
+
+        public static ReplayData LoadReplay(string path)
+        {
+            ReplayData replay = JsonConvert.DeserializeObject<ReplayData>(File.ReadAllText(path));
+            return replay;
+        }
+
+        public static ReplayData LoadReplayFromJson(string json)
+        {
+            ReplayData replay = JsonConvert.DeserializeObject<ReplayData>(json);
+            replay.OnDeserialize();
+            return replay;
+        }
+
         public static Chart LoadChart(string path)
         {
             StreamReader reader = new StreamReader(path);

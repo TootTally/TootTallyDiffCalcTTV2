@@ -52,9 +52,10 @@ namespace TootTallyDiffCalcTTV2
                     //Taken from HighscoreAccuracy https://github.com/emmett-shark/HighscoreAccuracy/blob/3f4be49f4ef31b8df1533511c7727bf7813c7773/Utils.cs#L30C1-L30C1
                     var champBonus = count - 1 > 23 ? 1.5m : 0m;
                     var realCoefficient = (Math.Min(count - 1, 10) + champBonus) * 0.1m + 1m;
-                    var noteScore = (int)Math.Floor((decimal)length * 10 * 100 * realCoefficient) * 10;
+                    var clampedLength = GetLength(length);
+                    var noteScore = (int)Math.Floor((decimal)clampedLength * 10 * 100 * realCoefficient) * 10;
                     maxScore += noteScore;
-                    gameMaxScore += (int)Math.Floor(Math.Floor(length * 10f * 100f * 1.315f) * 10f);
+                    gameMaxScore += (int)Math.Floor(Math.Floor(clampedLength * 10f * 100f * 1.315f) * 10f);
                     notesDict[i].Add(new Note(count, BeatToSeconds2(n[0], newTempo), BeatToSeconds2(length, newTempo), n[2], n[3], n[4]));
                     count++;
                 }
@@ -74,6 +75,8 @@ namespace TootTallyDiffCalcTTV2
             stopwatch.Stop();
             calculationTime = stopwatch.Elapsed;
         }
+
+        public static float GetLength(float length) => Math.Clamp(length, .2f, 5f) * 8f + 10f;
 
         // between 0.5f to 2f
         public float GetBaseTT(float speed) => Utils.CalculateBaseTT(GetDiffRating(Math.Clamp(speed, 0.5f, 2f)));
@@ -100,6 +103,239 @@ namespace TootTallyDiffCalcTTV2
         }
 
         public static float BeatToSeconds2(float beat, float bpm) => 60f / bpm * beat;
+
+
+        public ReplayData ConvertReplayV2(ReplayData replay)
+        {
+            bool wasSlider = false;
+            bool releasedBetweenNotes;
+            int currentScore = 0;
+            float health = 0; // 0 to 100
+            int combo = 0;
+            int highestCombo = 0;
+            int multiplier = 0; // 0 to 10
+            int[] noteTally = new int[5];
+
+            List<dynamic[]> convertedNoteData = new List<dynamic[]>();
+            float[] nextNote = null;
+            //Loop through all the notes in a chart
+            for (int i = 0; i < notes.Length; i++)
+            {
+                wasSlider = false;
+                releasedBetweenNotes = (int)replay.notedata[i][1] == 1;
+                float[] currNote = notes[i];
+                if (i + 1 < notes.Length)
+                    nextNote = notes[i + 1];
+                List<LengthAccPair> noteLengths = new List<LengthAccPair>
+                {
+                    new LengthAccPair(currNote[1], (float)replay.notedata[i][0])
+                };
+
+                //Scroll forward until the next note is no longer a slider
+                while (i + 1 < notes.Length && nextNote != null && IsSlider(currNote, nextNote))
+                {
+                    wasSlider = true;
+                    currNote = notes[++i];
+                    noteLengths.Add(new LengthAccPair(currNote[1], (float)replay.notedata[i][0])); //Create note length and note acc pair to weight later
+                    if (i >= noteLengths.Count)
+                        break;
+                    nextNote = notes[i + 1];
+                }
+
+                float noteAcc = 0f;
+                float totalLength = 0f;
+                if (wasSlider)
+                {
+                    //Get total length of all slider bodies
+                    totalLength = noteLengths.Select(x => x.length).Sum();
+                    for (int j = 0; j < noteLengths.Count; j++)
+                        noteAcc += noteLengths[j].acc * (noteLengths[j].length / totalLength); //Length weighted acc sum of all slider bodies
+                }
+                else
+                {
+                    //If its not a slider, just take the acc and length of it
+                    noteAcc = (float)replay.notedata[i][0];
+                    totalLength = currNote[1];
+                }
+
+                //Calc the score before doing the combo and health because fucking base game logic is MIND BLOWING I know
+                currentScore += GetScore(noteAcc, totalLength, multiplier, health == 100);
+
+                //Calc new health
+                var healthDiff = releasedBetweenNotes ? GetHealthDiff(noteAcc) : -15f;
+
+                if (health == 100 && healthDiff < 0)
+                    health = 0;
+                else if (health != 100)
+                    health += healthDiff;
+                health = Math.Clamp(health, 0, 100);
+
+                //Get the note tally
+                int tally = 0;
+                if (noteAcc > 95f) tally = 4;
+                else if (noteAcc > 88f) tally = 3;
+                else if (noteAcc > 79f) tally = 2;
+                else if (noteAcc > 70f) tally = 1;
+                noteTally[4 - tally]++;
+                //Only increase combo if you get more than 79% acc + update highest if needed
+                if (tally > 2)
+                {
+                    if (++combo > highestCombo)
+                        highestCombo = combo;
+                }
+                else
+                    combo = 0;
+
+                multiplier = Math.Min(combo, 10);
+
+                convertedNoteData.Add(new dynamic[9]
+                {
+                    noteAcc,
+                    releasedBetweenNotes ? 1 : 0,
+                    i,
+                    combo,
+                    multiplier,
+                    currentScore,
+                    health,
+                    highestCombo,
+                    tally
+                });
+            }
+
+            replay.notedata = convertedNoteData;
+            replay.finalnotetallies = noteTally;
+            replay.finalscore = convertedNoteData.Last()[5];
+            replay.maxcombo = highestCombo;
+            replay.version = "2.0.9";
+
+            return replay;
+        }
+
+        public ReplayData ConvertReplayV1(ReplayData replay)
+        {
+            bool wasSlider = false;
+            bool releasedBetweenNotes;
+            int currentScore = 0;
+            float health = 0; // 0 to 100
+            float previousHealth = 0;
+            int combo = 0;
+            int highestCombo = 0;
+            int multiplier = 0; // 0 to 10
+            int[] noteTally = new int[5];
+
+            List<dynamic[]> convertedNoteData = new List<dynamic[]>();
+            float[] nextNote = null;
+            //Loop through all the notes in a chart
+            for (int i = 0; i < notes.Length; i++)
+            {
+                wasSlider = false;
+                releasedBetweenNotes = previousHealth - (int)replay.notedata[i][3] > 15 && ((float)replay.notedata[i][5] / 1000f) > 79f;
+                float[] currNote = notes[i];
+                if (i + 1 < notes.Length)
+                    nextNote = notes[i + 1];
+                List<LengthAccPair> noteLengths = new List<LengthAccPair>
+                {
+                    new LengthAccPair(currNote[1], (float)replay.notedata[i][5] / 1000f)
+                };
+
+                //Scroll forward until the next note is no longer a slider
+                while (i + 1 < notes.Length && nextNote != null && IsSlider(currNote, nextNote))
+                {
+                    wasSlider = true;
+                    currNote = notes[++i];
+                    noteLengths.Add(new LengthAccPair(currNote[1], (float)replay.notedata[i][5] / 1000f)); //Create note length and note acc pair to weight later
+                    if (i >= noteLengths.Count)
+                        break;
+                    nextNote = notes[i + 1];
+                }
+
+                float noteAcc = 0f;
+                float totalLength = 0f;
+                if (wasSlider)
+                {
+                    //Get total length of all slider bodies
+                    totalLength = noteLengths.Select(x => x.length).Sum();
+                    for (int j = 0; j < noteLengths.Count; j++)
+                        noteAcc += noteLengths[j].acc * (noteLengths[j].length / totalLength); //Length weighted acc sum of all slider bodies
+                }
+                else
+                {
+                    //If its not a slider, just take the acc and length of it
+                    noteAcc = (float)replay.notedata[i][0];
+                    totalLength = currNote[1];
+                }
+
+                //Calc the score before doing the combo and health because fucking base game logic is MIND BLOWING I know
+                currentScore += GetScore(noteAcc, totalLength, multiplier, health == 100);
+
+                //Calc new health
+                var healthDiff = releasedBetweenNotes ? GetHealthDiff(noteAcc) : -15f;
+
+                if (health == 100 && healthDiff < 0)
+                    health = 0;
+                else if (health != 100)
+                    health += healthDiff;
+                health = Math.Clamp(health, 0, 100);
+
+                //Get the note tally
+                int tally = 0;
+                if (noteAcc > 95f) tally = 4;
+                else if (noteAcc > 88f) tally = 3;
+                else if (noteAcc > 79f) tally = 2;
+                else if (noteAcc > 70f) tally = 1;
+                noteTally[4 - tally]++;
+                //Only increase combo if you get more than 79% acc + update highest if needed
+                if (tally > 2)
+                {
+                    if (++combo > highestCombo)
+                        highestCombo = combo;
+                }
+                else
+                    combo = 0;
+
+                multiplier = Math.Min(combo, 10);
+                previousHealth = health;
+                convertedNoteData.Add(new dynamic[9]
+                {
+                    i,
+                    currentScore,
+                    multiplier,
+                    health,
+                    tally,
+                    (int)(noteAcc * 1000f),
+                    combo,
+                    releasedBetweenNotes ? 1 : 0,
+                    highestCombo
+                });
+            }
+
+            replay.notedata = convertedNoteData;
+            replay.finalnotetallies = noteTally;
+            replay.finalscore = convertedNoteData.Last()[5];
+            replay.maxcombo = highestCombo;
+            replay.version = "1.0.9";
+
+            return replay;
+        }
+
+        public static bool IsSlider(float[] currNote, float[] nextNote) => currNote[0] + currNote[1] + .025f >= nextNote[0];
+        public static float GetHealthDiff(float acc) => Math.Clamp((acc - 79f) * 0.2193f, -15f, 4.34f);
+        public static int GetScore(float acc, float totalLength, float mult, bool champ)
+        {
+            var baseScore = Math.Clamp(totalLength, 0.2f, 5f) * 8f + 10f;
+            return (int)Math.Floor(baseScore * acc * ((mult + (champ ? 1.5f : 0f)) * .1f + 1f)) * 10;
+        }
+
+        public class LengthAccPair
+        {
+            public float length, acc;
+
+            public LengthAccPair(float length, float acc)
+            {
+                this.length = length;
+                this.acc = acc;
+            }
+        }
 
     }
 }
