@@ -125,6 +125,7 @@ namespace TootTallyDiffCalcTTV2
                 WriteToConsoleAndFile($"{chart.name} processed in {chart.calculationTime.TotalSeconds}s");
                 WriteToConsoleAndFile($"MaxScore: {chart.maxScore}");
                 WriteToConsoleAndFile($"GameMaxScore: {chart.gameMaxScore}");
+                WriteToConsoleAndFile($"NoteCount: {chart.noteCount}");
                 WriteToConsoleAndFile("=====================================================================================================");
                 for (int i = 0; i < 7; i++)
                     DisplayAtSpeed(chart, i);

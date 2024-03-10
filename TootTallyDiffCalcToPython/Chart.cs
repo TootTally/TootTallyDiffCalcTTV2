@@ -30,6 +30,7 @@ namespace TootTallyDiffCalcTTV2
         public List<RatingCriterias.RatingError> ratingErrors;
 
         public TimeSpan calculationTime;
+        public int noteCount;
 
         public void OnDeserialize()
         {
@@ -40,6 +41,7 @@ namespace TootTallyDiffCalcTTV2
 
                 var newTempo = tempo * gamespeed;
                 int count = 1;
+                noteCount = GetNoteCount();
                 maxScore = 0;
                 gameMaxScore = 0;
                 notesDict[i] = new List<Note>(notes.Length);
@@ -77,6 +79,17 @@ namespace TootTallyDiffCalcTTV2
         }
 
         public static float GetLength(float length) => Math.Clamp(length, .2f, 5f) * 8f + 10f;
+
+        public int GetNoteCount()
+        {
+            int count = 0;
+            for (int i = 0; i + 1 < notes.Length; i++)
+            {
+                while (i + 1 < notes.Length && IsSlider(notes[i], notes[i + 1])) { i++; }
+                count++;
+            }
+            return count;
+        }
 
         // between 0.5f to 2f
         public float GetBaseTT(float speed) => Utils.CalculateBaseTT(GetDiffRating(Math.Clamp(speed, 0.5f, 2f)));
