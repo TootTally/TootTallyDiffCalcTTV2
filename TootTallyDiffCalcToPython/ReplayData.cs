@@ -41,5 +41,12 @@ namespace TootTallyDiffCalcTTV2
         }
 
         public string GetJsonString() => JsonConvert.SerializeObject(this);
+
+        public void FixReplayV1Conversion()
+        {
+            if (version != "1.0.9") return;
+
+            finalscore = notedata.Last()[1];
+        }
     }
 }

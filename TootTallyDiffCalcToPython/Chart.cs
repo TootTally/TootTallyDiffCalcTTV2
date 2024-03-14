@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.Reflection;
+using System.Security.AccessControl;
 
 namespace TootTallyDiffCalcTTV2
 {
@@ -41,9 +44,6 @@ namespace TootTallyDiffCalcTTV2
 
                 var newTempo = tempo * gamespeed;
                 int count = 1;
-                noteCount = GetNoteCount();
-                maxScore = 0;
-                gameMaxScore = 0;
                 notesDict[i] = new List<Note>(notes.Length);
 
                 foreach (float[] n in notes.OrderBy(x => x[0]))
@@ -52,16 +52,12 @@ namespace TootTallyDiffCalcTTV2
                     if (length <= 0)//minLength only applies if the note is less or equal to 0 beats, else it keeps its "lower than minimum" length
                         length = 0.015f;
                     //Taken from HighscoreAccuracy https://github.com/emmett-shark/HighscoreAccuracy/blob/3f4be49f4ef31b8df1533511c7727bf7813c7773/Utils.cs#L30C1-L30C1
-                    var champBonus = count - 1 > 23 ? 1.5m : 0m;
-                    var realCoefficient = (Math.Min(count - 1, 10) + champBonus) * 0.1m + 1m;
-                    var clampedLength = GetLength(length);
-                    var noteScore = (int)Math.Floor((decimal)clampedLength * 10 * 100 * realCoefficient) * 10;
-                    maxScore += noteScore;
-                    gameMaxScore += (int)Math.Floor(Math.Floor(clampedLength * 10f * 100f * 1.315f) * 10f);
                     notesDict[i].Add(new Note(count, BeatToSeconds2(n[0], newTempo), BeatToSeconds2(length, newTempo), n[2], n[3], n[4]));
                     count++;
                 }
             }
+            CalcNoteCount();
+            CalcScores();
 
             performances = new ChartPerformances(this);
             ratingErrors = RatingCriterias.GetRatingErrors(this);
@@ -80,15 +76,35 @@ namespace TootTallyDiffCalcTTV2
 
         public static float GetLength(float length) => Math.Clamp(length, .2f, 5f) * 8f + 10f;
 
-        public int GetNoteCount()
+        public void CalcNoteCount()
         {
-            int count = 0;
+            noteCount = 0;
             for (int i = 0; i + 1 < notes.Length; i++)
             {
                 while (i + 1 < notes.Length && IsSlider(notes[i], notes[i + 1])) { i++; }
-                count++;
+                noteCount++;
             }
-            return count;
+        }
+
+        public void CalcScores()
+        {
+            maxScore = 0;
+            gameMaxScore = 0;
+            for (int i = 0; i < notes.Length; i++)
+            {
+                var length = notes[i][1];
+                while (i + 1 < notes.Length && notes[i][0] + notes[i][1] + .025f >= notes[i + 1][0])
+                {
+                    length += notes[i + 1][1];
+                    i++;
+                }
+                var champBonus = i > 23 ? 1.5d : 0d;
+                var realCoefficient = (Math.Min(i, 10) + champBonus) * 0.1d + 1d;
+                var clampedLength = GetLength(length);
+                var noteScore = (int)(Math.Floor((float)((double)clampedLength * 100d * realCoefficient)) * 10f);
+                maxScore += noteScore;
+                gameMaxScore += (int)Math.Floor(Math.Floor(clampedLength * 100f * 1.315f) * 10f);
+            }
         }
 
         // between 0.5f to 2f
@@ -118,6 +134,27 @@ namespace TootTallyDiffCalcTTV2
         public static float BeatToSeconds2(float beat, float bpm) => 60f / bpm * beat;
 
 
+        public static int GetConvertionVersion(ReplayData replay)
+        {
+            if (replay.version == "0.0.0")
+                return replay.notedata.First().Length >= 6 ? 0 : -1;
+            else
+                return string.Compare(replay.version, "2.0.0") < 0 ? 1 : 2;
+        }
+
+        public ReplayData TryConvertReplay(ReplayData replay)
+        {
+            var id = GetConvertionVersion(replay);
+            if (id == -1)
+            {
+                Console.WriteLine($"Replay {replay.uuid} cannot be converted.");
+                return replay;
+            }
+            else
+                return id == 0 || id == 1 ? ConvertReplayV1(replay) : ConvertReplayV2(replay);
+        }
+
+
         public ReplayData ConvertReplayV2(ReplayData replay)
         {
             bool wasSlider = false;
@@ -139,7 +176,7 @@ namespace TootTallyDiffCalcTTV2
                 float[] currNote = notes[i];
                 if (i + 1 < notes.Length)
                     nextNote = notes[i + 1];
-                List<LengthAccPair> noteLengths = new List<LengthAccPair>
+                List<LengthAccPair> noteLengths = new()
                 {
                     new LengthAccPair(currNote[1], (float)replay.notedata[i][0])
                 };
@@ -150,7 +187,7 @@ namespace TootTallyDiffCalcTTV2
                     wasSlider = true;
                     currNote = notes[++i];
                     noteLengths.Add(new LengthAccPair(currNote[1], (float)replay.notedata[i][0])); //Create note length and note acc pair to weight later
-                    if (i >= noteLengths.Count)
+                    if (i + 1 >= notes.Length)
                         break;
                     nextNote = notes[i + 1];
                 }
@@ -257,7 +294,7 @@ namespace TootTallyDiffCalcTTV2
                     wasSlider = true;
                     currNote = notes[++i];
                     noteLengths.Add(new LengthAccPair(currNote[1], (float)replay.notedata[i][5] / 1000f)); //Create note length and note acc pair to weight later
-                    if (i >= noteLengths.Count)
+                    if (i + 1 >= notes.Length)
                         break;
                     nextNote = notes[i + 1];
                 }
@@ -324,14 +361,14 @@ namespace TootTallyDiffCalcTTV2
 
             replay.notedata = convertedNoteData;
             replay.finalnotetallies = noteTally;
-            replay.finalscore = convertedNoteData.Last()[5];
+            replay.finalscore = convertedNoteData.Last()[1]; //Supposed to be [1]
             replay.maxcombo = highestCombo;
             replay.version = "1.0.9";
 
             return replay;
         }
 
-        public static bool IsSlider(float[] currNote, float[] nextNote) => currNote[0] + currNote[1] + .025f >= nextNote[0];
+            public static bool IsSlider(float[] currNote, float[] nextNote) => currNote[0] + currNote[1] + .025f >= nextNote[0];
         public static float GetHealthDiff(float acc) => Math.Clamp((acc - 79f) * 0.2193f, -15f, 4.34f);
         public static int GetScore(float acc, float totalLength, float mult, bool champ)
         {
