@@ -6,10 +6,9 @@ namespace TootTallyDiffCalcTTV2
 {
     public class TootTallyDiffCalcTTV2
     {
-        #region hellooffbeatwitch
         public static List<Chart> chartList;
-        public const string VERSION_LABEL = "3.1.5";
-        public const string BUILD_DATE = "13032024";
+        public const string VERSION_LABEL = "3.2.2";
+        public const string BUILD_DATE = "16032024";
         public static StreamWriter fileWriter;
 
         public static void Main()
@@ -24,7 +23,10 @@ namespace TootTallyDiffCalcTTV2
                 Console.Clear();
                 if (File.Exists(path))
                 {
-                    OutputSingleChart(path, true);
+                    if (path.Contains(".ttr"))
+                        TestReplayConvertion(path);
+                    else
+                        OutputSingleChart(path, true);
                 }
                 else if (Directory.Exists(path))
                 {
@@ -138,8 +140,36 @@ namespace TootTallyDiffCalcTTV2
             }
 
         }
-        #endregion
 
+        public static void TestReplayConvertion(string path)
+        {
+            ReplayData replay = ChartReader.LoadReplay(path);
+            WriteToConsoleAndFile($"Replay version: {replay.version}");
+            WriteToConsoleAndFile($"Replay score: {replay.finalscore}");
+            Chart chart = null;
+            var tmbpath = "";
+            while (chart == null || chart.name != replay.song)
+            {
+                Console.Write($"Input path for {replay.song}: ");
+                tmbpath = @"" + Console.ReadLine();
+                if (File.Exists(tmbpath))
+                    try
+                    {
+                        chart = ChartReader.LoadChart(tmbpath);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Chart not found.");
+                        chart = null;
+                    }
+            }
+            Console.WriteLine("Converting replay...");
+            var convertedReplay = chart.TryConvertReplay(replay);
+            Console.WriteLine($"Converted replay version: {convertedReplay.version}");
+            Console.WriteLine($"Converted replay score: {convertedReplay.finalscore}");
+            Console.WriteLine($"Converted replay accuracy: {convertedReplay.finalscore / chart.maxScore:P2}");
+            File.WriteAllText(path.Replace(".ttr", "-Converted.ttr"), convertedReplay.GetJsonString());
+        }
 
         public static Chart ProcessChart(string path) => ChartReader.LoadChart(path);
 
@@ -180,6 +210,12 @@ namespace TootTallyDiffCalcTTV2
         {
             Console.WriteLine(text);
             fileWriter.WriteLine(text);
+        }
+
+        public static void ForceGC()
+        {
+            for (int i = 0; i < 3; i++)
+                GC.Collect(i, GCCollectionMode.Forced);
         }
 
     }

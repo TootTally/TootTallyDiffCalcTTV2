@@ -46,7 +46,7 @@ namespace TootTallyDiffCalcTTV2
         {
             if (version != "1.0.9") return;
 
-            finalscore = notedata.Last()[1];
+            finalscore = (int)notedata.Last()[1];
         }
     }
 }

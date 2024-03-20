@@ -56,7 +56,7 @@ namespace TootTallyDiffCalcTTV2
                     count++;
                 }
             }
-            CalcNoteCount();
+            noteCount = CalcNoteCount();
             CalcScores();
 
             performances = new ChartPerformances(this);
@@ -76,20 +76,22 @@ namespace TootTallyDiffCalcTTV2
 
         public static float GetLength(float length) => Math.Clamp(length, .2f, 5f) * 8f + 10f;
 
-        public void CalcNoteCount()
+        public int CalcNoteCount()
         {
-            noteCount = 0;
-            for (int i = 0; i + 1 < notes.Length; i++)
+            var noteCount = 0;
+            for (int i = 0; i < notes.Length; i++)
             {
                 while (i + 1 < notes.Length && IsSlider(notes[i], notes[i + 1])) { i++; }
                 noteCount++;
             }
+            return noteCount;
         }
 
         public void CalcScores()
         {
             maxScore = 0;
             gameMaxScore = 0;
+            var noteCount = 0;
             for (int i = 0; i < notes.Length; i++)
             {
                 var length = notes[i][1];
@@ -98,13 +100,29 @@ namespace TootTallyDiffCalcTTV2
                     length += notes[i + 1][1];
                     i++;
                 }
-                var champBonus = i > 23 ? 1.5d : 0d;
-                var realCoefficient = (Math.Min(i, 10) + champBonus) * 0.1d + 1d;
+                var champBonus = noteCount > 23 ? 1.5d : 0d;
+                var realCoefficient = (Math.Min(noteCount, 10) + champBonus) * 0.1d + 1d;
                 var clampedLength = GetLength(length);
                 var noteScore = (int)(Math.Floor((float)((double)clampedLength * 100d * realCoefficient)) * 10f);
                 maxScore += noteScore;
                 gameMaxScore += (int)Math.Floor(Math.Floor(clampedLength * 100f * 1.315f) * 10f);
+                noteCount++;
             }
+        }
+
+        public void CalcPerformances()
+        {
+            performances = new ChartPerformances(this);
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            for (int i = 0; i < Utils.GAME_SPEED.Length; i++)
+            {
+                performances.CalculatePerformances(i);
+                performances.CalculateAnalytics(i);
+                performances.CalculateRatings(i);
+            }
+            stopwatch.Stop();
+            calculationTime = stopwatch.Elapsed;
         }
 
         // between 0.5f to 2f
@@ -228,7 +246,7 @@ namespace TootTallyDiffCalcTTV2
                 else if (noteAcc > 70f) tally = 1;
                 noteTally[4 - tally]++;
                 //Only increase combo if you get more than 79% acc + update highest if needed
-                if (tally > 2)
+                if (tally > 2 && releasedBetweenNotes)
                 {
                     if (++combo > highestCombo)
                         highestCombo = combo;
@@ -279,7 +297,10 @@ namespace TootTallyDiffCalcTTV2
             for (int i = 0; i < notes.Length; i++)
             {
                 wasSlider = false;
-                releasedBetweenNotes = previousHealth - (int)replay.notedata[i][3] > 15 && ((float)replay.notedata[i][5] / 1000f) > 79f;
+                var replayHealth = (int)replay.notedata[i][3];
+                releasedBetweenNotes = !(replayHealth < previousHealth && ((float)replay.notedata[i][5] / 1000f) > 79f);
+                previousHealth = replayHealth;
+
                 float[] currNote = notes[i];
                 if (i + 1 < notes.Length)
                     nextNote = notes[i + 1];
@@ -311,7 +332,7 @@ namespace TootTallyDiffCalcTTV2
                 else
                 {
                     //If its not a slider, just take the acc and length of it
-                    noteAcc = (float)replay.notedata[i][0];
+                    noteAcc = (float)replay.notedata[i][5] / 1000f;
                     totalLength = currNote[1];
                 }
 
@@ -335,7 +356,7 @@ namespace TootTallyDiffCalcTTV2
                 else if (noteAcc > 70f) tally = 1;
                 noteTally[4 - tally]++;
                 //Only increase combo if you get more than 79% acc + update highest if needed
-                if (tally > 2)
+                if (tally > 2 && releasedBetweenNotes)
                 {
                     if (++combo > highestCombo)
                         highestCombo = combo;
@@ -344,13 +365,12 @@ namespace TootTallyDiffCalcTTV2
                     combo = 0;
 
                 multiplier = Math.Min(combo, 10);
-                previousHealth = health;
                 convertedNoteData.Add(new dynamic[9]
                 {
                     i,
                     currentScore,
                     multiplier,
-                    health,
+                    (int)health,
                     tally,
                     (int)(noteAcc * 1000f),
                     combo,
@@ -368,7 +388,7 @@ namespace TootTallyDiffCalcTTV2
             return replay;
         }
 
-            public static bool IsSlider(float[] currNote, float[] nextNote) => currNote[0] + currNote[1] + .025f >= nextNote[0];
+        public static bool IsSlider(float[] currNote, float[] nextNote) => currNote[0] + currNote[1] + .025f >= nextNote[0];
         public static float GetHealthDiff(float acc) => Math.Clamp((acc - 79f) * 0.2193f, -15f, 4.34f);
         public static int GetScore(float acc, float totalLength, float mult, bool champ)
         {
