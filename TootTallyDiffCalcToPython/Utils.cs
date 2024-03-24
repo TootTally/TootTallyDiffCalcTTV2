@@ -28,7 +28,7 @@ namespace TootTallyDiffCalcTTV2
         public static float CalculateBaseTT(float starRating)
         {
 
-            return (0.7f * FastPow(starRating, 2) + (12f * starRating) + 0.05f)/1.5f;
+            return (0.5f * FastPow(starRating, 2) + (7f * starRating) + 0.05f);
             //y = (0.7x^2 + 12x + 0.05)/1.5
         }
 
