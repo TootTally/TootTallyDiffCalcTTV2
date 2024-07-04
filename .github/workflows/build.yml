@@ -1,4 +1,4 @@
-name: Deploy
+name: Build DLL
 
 on:
   push:
@@ -22,3 +22,9 @@ jobs:
         with:
             name: DiffCalcDLL
             path: ./TootTallyDiffCalcToPython/bin/Debug/net6.0/TootTallyDiffCalcTTV2.dll
+      - name: Send over file to Discord
+        uses: tsickert/discord-webhook@v5.3.0
+        with:
+            webhook-url: ${{ secrets.WEBHOOK_URL }}
+            content: "New build pushed to master for diff calc! (Commit `${{ github.sha }}`)"
+            filename: ./TootTallyDiffCalcToPython/bin/Debug/net6.0/TootTallyDiffCalcTTV2.dll
