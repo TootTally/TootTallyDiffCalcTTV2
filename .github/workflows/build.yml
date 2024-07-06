@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - '.github/**'
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
