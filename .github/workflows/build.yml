@@ -1,0 +1,33 @@
+name: Build DLL
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '.github/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Setup .NET 6 environment
+        uses: actions/setup-dotnet@v4
+        with:
+            dotnet-version: '6.x'
+      - name: Build diffcalc DLL
+        run: dotnet build
+      - name: Save DLL as artifact
+        uses: actions/upload-artifact@v4
+        with:
+            name: DiffCalcDLL
+            path: ./TootTallyDiffCalcToPython/bin/Debug/net6.0/TootTallyDiffCalcTTV2.dll
+      - name: Send over file to Discord
+        uses: tsickert/discord-webhook@v6.0.0
+        with:
+            webhook-url: ${{ secrets.WEBHOOK_URL }}
+            content: "New build pushed to master for diff calc! (Commit `${{ github.sha }}`)"
+            filename: ./TootTallyDiffCalcToPython/bin/Debug/net6.0/TootTallyDiffCalcTTV2.dll
