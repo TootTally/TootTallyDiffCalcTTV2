@@ -1,7 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Reflection;
-using System.Security.AccessControl;
+﻿using System.Diagnostics;
 
 namespace TootTallyDiffCalcTTV2
 {
@@ -32,42 +29,59 @@ namespace TootTallyDiffCalcTTV2
         public ChartPerformances performances;
         public List<RatingCriterias.RatingError> ratingErrors;
 
-        public TimeSpan calculationTime;
+        public TimeSpan calculationTime, criteriaCalculationTime;
         public int noteCount;
+        public float songLength, songLengthMult;
 
         public void OnDeserialize()
         {
             notesDict = new Dictionary<float, List<Note>>();
+            var noteCount = 0;
             for (int i = 0; i < Utils.GAME_SPEED.Length; i++)
             {
                 var gamespeed = Utils.GAME_SPEED[i];
 
                 var newTempo = tempo * gamespeed;
                 int count = 1;
-                notesDict[i] = new List<Note>(notes.Length);
-
-                foreach (float[] n in notes.OrderBy(x => x[0]))
+                notesDict[i] = new List<Note>(notes.Length) { new Note(0, 0, .015f, 0, 0, 0, false) };
+                var sortedNotes = notes.OrderBy(x => x[0]).ToArray();
+                for (int j = 0; j < sortedNotes.Length; j++)
                 {
-                    float length = n[1];
+                    float length = sortedNotes[j][1];
                     if (length <= 0)//minLength only applies if the note is less or equal to 0 beats, else it keeps its "lower than minimum" length
                         length = 0.015f;
-                    //Taken from HighscoreAccuracy https://github.com/emmett-shark/HighscoreAccuracy/blob/3f4be49f4ef31b8df1533511c7727bf7813c7773/Utils.cs#L30C1-L30C1
-                    notesDict[i].Add(new Note(count, BeatToSeconds2(n[0], newTempo), BeatToSeconds2(length, newTempo), n[2], n[3], n[4]));
+                    bool isSlider;
+                    if (i > 0)
+                        isSlider = notesDict[0][j + 1].isSlider;
+                    else
+                        isSlider = j + 1 < sortedNotes.Length && IsSlider(sortedNotes[j], sortedNotes[j + 1]);
+                    if (i == 0 && !isSlider)
+                        noteCount++;
+                    notesDict[i].Add(new Note(count, BeatToSeconds2(sortedNotes[j][0], newTempo), BeatToSeconds2(length, newTempo), sortedNotes[j][2], sortedNotes[j][3], sortedNotes[j][4], isSlider));
                     count++;
                 }
             }
-            noteCount = CalcNoteCount();
+            this.noteCount = noteCount;
             CalcScores();
 
-            performances = new ChartPerformances(this);
-            ratingErrors = RatingCriterias.GetRatingErrors(this);
+            if (notesDict[2].Count > 2)
+                songLength = notesDict[2].Last().position - notesDict[2][1].position;
+            if (songLength < 1) songLength = 1;
+            songLengthMult = MathF.Pow(songLength / 30f, -MathF.E * .2f) + .55f; //https://www.desmos.com/calculator/cji0kmmocu
 
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+
+            performances = new ChartPerformances(this);
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            ratingErrors = RatingCriterias.GetRatingErrors(this);
+            stopwatch.Stop();
+            criteriaCalculationTime = stopwatch.Elapsed;
+
+            stopwatch = Stopwatch.StartNew();
             for (int i = 0; i < Utils.GAME_SPEED.Length; i++)
             {
                 performances.CalculatePerformances(i);
-                performances.CalculateAnalytics(i);
+                performances.CalculateAnalytics(i, songLengthMult);
                 performances.CalculateRatings(i);
             }
             stopwatch.Stop();
@@ -76,7 +90,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static float GetLength(float length) => Math.Clamp(length, .2f, 5f) * 8f + 10f;
 
-        public int CalcNoteCount()
+        public int GetNoteCount()
         {
             var noteCount = 0;
             for (int i = 0; i < notes.Length; i++)
@@ -118,7 +132,7 @@ namespace TootTallyDiffCalcTTV2
             for (int i = 0; i < Utils.GAME_SPEED.Length; i++)
             {
                 performances.CalculatePerformances(i);
-                performances.CalculateAnalytics(i);
+                performances.CalculateAnalytics(i, songLengthMult);
                 performances.CalculateRatings(i);
             }
             stopwatch.Stop();
@@ -194,7 +208,7 @@ namespace TootTallyDiffCalcTTV2
                 float[] currNote = notes[i];
                 if (i + 1 < notes.Length)
                     nextNote = notes[i + 1];
-                List<LengthAccPair> noteLengths = new()
+                List<LengthAccPair> noteLengths = new List<LengthAccPair>()
                 {
                     new LengthAccPair(currNote[1], (float)replay.notedata[i][0])
                 };
@@ -394,6 +408,16 @@ namespace TootTallyDiffCalcTTV2
         {
             var baseScore = Math.Clamp(totalLength, 0.2f, 5f) * 8f + 10f;
             return (int)Math.Floor(baseScore * acc * ((mult + (champ ? 1.5f : 0f)) * .1f + 1f)) * 10;
+        }
+
+        public void Dispose()
+        {
+            notes = null;
+            bgdata = null;
+            lyrics?.Clear();
+            notesDict?.Clear();
+            ratingErrors?.Clear();
+            performances.Dispose();
         }
 
         public class LengthAccPair

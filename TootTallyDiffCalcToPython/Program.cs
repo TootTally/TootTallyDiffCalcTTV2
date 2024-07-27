@@ -1,14 +1,12 @@
-﻿using Newtonsoft.Json;
-using System.Diagnostics;
-using System.Globalization;
+﻿using System.Diagnostics;
 
 namespace TootTallyDiffCalcTTV2
 {
     public class TootTallyDiffCalcTTV2
     {
         public static List<Chart> chartList;
-        public const string VERSION_LABEL = "4.0.2";
-        public const string BUILD_DATE = "24032024";
+        public const string VERSION_LABEL = "4.2.2";
+        public const string BUILD_DATE = "27042024";
         public static StreamWriter fileWriter;
 
         public static void Main()
@@ -125,9 +123,14 @@ namespace TootTallyDiffCalcTTV2
             if (writeToConsole)
             {
                 WriteToConsoleAndFile($"{chart.name} processed in {chart.calculationTime.TotalSeconds}s");
+                WriteToConsoleAndFile($"Criterias processed in {chart.criteriaCalculationTime.TotalSeconds}s");
                 WriteToConsoleAndFile($"MaxScore: {chart.maxScore}");
                 WriteToConsoleAndFile($"GameMaxScore: {chart.gameMaxScore}");
                 WriteToConsoleAndFile($"NoteCount: {chart.noteCount}");
+                WriteToConsoleAndFile($"TestScore:{chart.GetDynamicDiffRating(1, .8f)}");
+                WriteToConsoleAndFile($"TestScore2:{chart.GetDynamicDiffRating(1, .3f)}");
+                WriteToConsoleAndFile($"TestScore3:{Utils.CalculateScoreTT(chart, 1f, .8f)}");
+                WriteToConsoleAndFile($"TestScore4:{Utils.CalculateScoreTT(chart, 1f, .3f)}");
                 WriteToConsoleAndFile("=====================================================================================================");
                 for (int i = 0; i < 7; i++)
                     DisplayAtSpeed(chart, i);
@@ -182,7 +185,7 @@ namespace TootTallyDiffCalcTTV2
                 var files = Directory.GetFiles(directory);
                 var tempList = new List<Chart>(files.Length);
 
-                Stopwatch stopwatch = new();
+                Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
                 Parallel.ForEach(files, f =>
                 {

@@ -1,5 +1,4 @@
-﻿
-namespace TootTallyDiffCalcTTV2
+﻿namespace TootTallyDiffCalcTTV2
 {
     public static class Utils
     {
@@ -27,38 +26,37 @@ namespace TootTallyDiffCalcTTV2
         //https://www.desmos.com/calculator/rhwqyp21nr
         public static float CalculateBaseTT(float starRating)
         {
-
             return (0.5f * FastPow(starRating, 2) + (7f * starRating) + 0.05f);
             //y = (0.7x^2 + 12x + 0.05)/1.5
         }
 
-        //https://www.desmos.com/calculator/x7c0zutgsn
+        //https://www.desmos.com/calculator/m8vmkvdqo8
         public static float CalculateScoreTT(Chart chart, float replaySpeed, float percent, string[] modifiers = null)
         {
             var baseTT = CalculateBaseTT(chart.GetDynamicDiffRating(replaySpeed, percent, modifiers));
 
             float scoreTT;
-            if (percent < 0.98f)
-                scoreTT = ((c * MathF.Pow(MathF.E, b * percent)) - c) * baseTT;//y = (0.28091281 * e^6x - 0.028091281) * b
+            if (percent < 0.95f)
+                scoreTT = ((c * MathF.Pow(MathF.E, b * percent)) - c) * baseTT;
             else
-                scoreTT = FastPow(9.2f * percent - 7.43037117f, 5) * baseTT;
+                scoreTT = FastPow(8.7f * percent - 6.496914352f, 4) * baseTT;
 
             return scoreTT;
         }
 
-        public const float c = 0.028091281f;
-        public const float b = 6f;
+        public const float c = 0.6f;
+        public const float b = 3f;
 
-        //https://www.desmos.com/calculator/x7c0zutgsn
+        //https://www.desmos.com/calculator/imevezbyz8
         public static float CalculateScoreTT(float[] diffRatings, float replaySpeed, float percent)
         {
             var baseTT = CalculateBaseTT(LerpDiff(diffRatings, replaySpeed));
 
             float scoreTT;
-            if (percent < 0.98f)
-                scoreTT = ((c * MathF.Pow(MathF.E, b * percent)) - c) * baseTT;//y = (0.28091281 * e^6x - 0.028091281) * b
+            if (percent < 0.95f)
+                scoreTT = ((c * MathF.Pow(MathF.E, b * percent)) - c) * baseTT;
             else
-                scoreTT = FastPow(9.2f * percent - 7.43037117f, 5) * baseTT;
+                scoreTT = FastPow(8.7f * percent - 6.496914352f, 4) * baseTT;
 
             return scoreTT;
         }
