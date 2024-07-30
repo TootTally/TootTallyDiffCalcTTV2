@@ -4,6 +4,8 @@ on:
     workflow_dispatch:
     workflow_run:
         workflows: ["Build DLL"]
+        types:
+            - completed
 
 jobs:
     recalc:
