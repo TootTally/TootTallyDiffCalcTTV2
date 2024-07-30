@@ -39,13 +39,13 @@
             if (percent < 0.95f)
                 scoreTT = ((c * MathF.Pow(MathF.E, b * percent)) - c) * baseTT;
             else
-                scoreTT = FastPow(8.7f * percent - 6.496914352f, 4) * baseTT;
+                scoreTT = FastPow(8f * percent - 5.831914355f, 4) * baseTT;
 
             return scoreTT;
         }
 
-        public const float c = 0.6f;
-        public const float b = 3f;
+        public const float c = 0.734992228f;
+        public const float b = 2.8f;
 
         //https://www.desmos.com/calculator/imevezbyz8
         public static float CalculateScoreTT(float[] diffRatings, float replaySpeed, float percent)
@@ -56,7 +56,7 @@
             if (percent < 0.95f)
                 scoreTT = ((c * MathF.Pow(MathF.E, b * percent)) - c) * baseTT;
             else
-                scoreTT = FastPow(8.7f * percent - 6.496914352f, 4) * baseTT;
+                scoreTT = FastPow(8f * percent - 5.831914355f, 4) * baseTT;
 
             return scoreTT;
         }

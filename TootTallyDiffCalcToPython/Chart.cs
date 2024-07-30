@@ -67,8 +67,7 @@ namespace TootTallyDiffCalcTTV2
             if (notesDict[2].Count > 2)
                 songLength = notesDict[2].Last().position - notesDict[2][1].position;
             if (songLength < 1) songLength = 1;
-            songLengthMult = MathF.Pow(songLength / 30f, -MathF.E * .2f) + .55f; //https://www.desmos.com/calculator/cji0kmmocu
-
+            songLengthMult = MathF.Pow(songLength / 15f, -MathF.E * .16f) + .475f; //https://www.desmos.com/calculator/cupmg3mh8j
 
             performances = new ChartPerformances(this);
 
