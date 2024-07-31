@@ -30,35 +30,43 @@
             //y = (0.7x^2 + 12x + 0.05)/1.5
         }
 
-        //https://www.desmos.com/calculator/m8vmkvdqo8
-        public static float CalculateScoreTT(Chart chart, float replaySpeed, float percent, string[] modifiers = null)
+        public static float CalculateScoreTT(Chart chart, float replaySpeed, float percent, string[] modifiers = null) =>
+            CalculateBaseTT(chart.GetDynamicDiffRating(replaySpeed, percent, modifiers) * GetMultiplier(percent));
+
+        public static float CalculateScoreTT(float[] diffRatings, float replaySpeed, float percent) =>
+            CalculateBaseTT(LerpDiff(diffRatings, replaySpeed)) * GetMultiplier(percent);
+
+        //OLD: https://www.desmos.com/calculator/6rle1shggs
+        public static readonly Dictionary<float, float> accToMultDict = new Dictionary<float, float>()
         {
-            var baseTT = CalculateBaseTT(chart.GetDynamicDiffRating(replaySpeed, percent, modifiers));
+            { 1f, 46f },
+            { .999f, 39f },
+            { .996f, 32.6f },
+            { .993f, 27.5f },
+            { .99f, 23.5f },
+            { .985f, 19.8f },
+            { .98f, 16.8f },
+            { .97f, 14.2f },
+            { .96f, 12f },
+            { .95f, 11f },
+            { .925f, 8.9f },
+            { .875f, 6.8f },
+            { .8f, 4.5f },
+            { .7f, 2.7f },
+            { .6f, 1.4f },
+            { .5f, 0.6f },
+            { .25f, 0.2f },
+            { 0, 0 },
+        };
 
-            float scoreTT;
-            if (percent < 0.95f)
-                scoreTT = ((c * MathF.Pow(MathF.E, b * percent)) - c) * baseTT;
-            else
-                scoreTT = FastPow(8f * percent - 5.831914355f, 4) * baseTT;
-
-            return scoreTT;
-        }
-
-        public const float c = 0.734992228f;
-        public const float b = 2.8f;
-
-        //https://www.desmos.com/calculator/imevezbyz8
-        public static float CalculateScoreTT(float[] diffRatings, float replaySpeed, float percent)
+        public static float GetMultiplier(float percent)
         {
-            var baseTT = CalculateBaseTT(LerpDiff(diffRatings, replaySpeed));
-
-            float scoreTT;
-            if (percent < 0.95f)
-                scoreTT = ((c * MathF.Pow(MathF.E, b * percent)) - c) * baseTT;
-            else
-                scoreTT = FastPow(8f * percent - 5.831914355f, 4) * baseTT;
-
-            return scoreTT;
+            int index;
+            for (index = 1; index < accToMultDict.Count && accToMultDict.Keys.ElementAt(index) > percent; index++) ;
+            var percMax = accToMultDict.Keys.ElementAt(index);
+            var percMin = accToMultDict.Keys.ElementAt(index - 1);
+            var by = (percent - percMin) / (percMax - percMin);
+            return Lerp(accToMultDict[percMin], accToMultDict[percMax], by);
         }
 
         public static float LerpDiff(float[] diffRatings, float speed)
