@@ -31,7 +31,7 @@
         }
 
         public static float CalculateScoreTT(Chart chart, float replaySpeed, float percent, string[] modifiers = null) =>
-            CalculateBaseTT(chart.GetDynamicDiffRating(replaySpeed, percent, modifiers) * GetMultiplier(percent));
+            CalculateBaseTT(chart.GetDynamicDiffRating(replaySpeed, percent, modifiers)) * GetMultiplier(percent);
 
         public static float CalculateScoreTT(float[] diffRatings, float replaySpeed, float percent) =>
             CalculateBaseTT(LerpDiff(diffRatings, replaySpeed)) * GetMultiplier(percent);
