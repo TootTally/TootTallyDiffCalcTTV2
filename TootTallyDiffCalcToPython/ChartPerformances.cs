@@ -95,7 +95,6 @@ namespace TootTallyDiffCalcTTV2
                     var deltaSlideSum = MathF.Abs(prevNote.pitchDelta);
                     if (deltaSlideSum <= CHEESABLE_THRESHOLD)
                         deltaSlideSum *= .35f;
-                    var sliderCount = 0;
                     while (prevNote.isSlider)
                     {
                         if (j-- <= 0)
@@ -111,8 +110,6 @@ namespace TootTallyDiffCalcTTV2
                             lengthSum += prevNote.length;
                             if (deltaSlide <= CHEESABLE_THRESHOLD)
                                 deltaSlide *= .25f;
-                            else
-                                sliderCount++;
                             deltaSlideSum += deltaSlide;
                         }
 
