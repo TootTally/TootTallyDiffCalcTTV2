@@ -58,8 +58,8 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 325;
-        public const float TAP_DIV = 225;
+        public const float AIM_DIV = 350;
+        public const float TAP_DIV = 220;
         public const float ACC_DIV = 375;
         public const float AIM_END = 750;
         public const float TAP_END = 15;
@@ -144,7 +144,7 @@ namespace TootTallyDiffCalcTTV2
 
                 if (i > 0)
                 {
-                    var endDivider = 61f - MathF.Min(currentNote.position - noteList[i - 1].position, 2f) * 30f;
+                    var endDivider = 61f - MathF.Min(currentNote.position - noteList[i - 1].position, 5f) * 12f;
                     var aimThreshold = MathF.Pow(aimStrain, 1.08f) * 1.2f;
                     var tapThreshold = MathF.Pow(tapStrain, 1.08f) * 1.2f;
                     if (aimEndurance >= aimThreshold)
