@@ -30,8 +30,11 @@
             //y = (0.7x^2 + 12x + 0.05)/1.5
         }
 
-        public static float CalculateScoreTT(Chart chart, float replaySpeed, float percent, string[] modifiers = null) =>
-            CalculateBaseTT(chart.GetDynamicDiffRating(replaySpeed, percent, modifiers)) * GetMultiplier(percent);
+        public static float CalculateScoreTT(Chart chart, ScoreData score) =>
+            CalculateBaseTT(chart.GetDynamicDiffRating(score.replay_speed, score.GetHitCount, score.modifiers)) * GetMultiplier(score.percentage);
+
+        public static float CalculateScoreTT(Chart chart, float replaySpeed, int hitCount, float percent, string[] modifiers = null) =>
+            CalculateBaseTT(chart.GetDynamicDiffRating(replaySpeed, hitCount, modifiers)) * GetMultiplier(percent);
 
         public static float CalculateScoreTT(float[] diffRatings, float replaySpeed, float percent) =>
             CalculateBaseTT(LerpDiff(diffRatings, replaySpeed)) * GetMultiplier(percent);

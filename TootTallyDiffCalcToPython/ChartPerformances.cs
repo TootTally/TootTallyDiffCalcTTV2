@@ -81,8 +81,6 @@ namespace TootTallyDiffCalcTTV2
                 var tapStrain = 0f;
                 for (int j = i - 1; j >= 0 && noteCount < 64 && (MathF.Abs(currentNote.position - noteList[j].position) <= MAX_DIST || i - j <= 2); j--)
                 {
-                    //if (noteCount <= 10) continue;
-
                     var prevNote = noteList[j];
                     var nextNote = noteList[j + 1];
                     if (prevNote.position >= nextNote.position) break;
@@ -242,21 +240,21 @@ namespace TootTallyDiffCalcTTV2
                 starRatingDict[gamespeed] = 0f;
         }
 
-        public float GetDynamicAimRating(float percent, float speed) => GetDynamicSkillRating(percent, speed, aimPerfDict);
-        public float GetDynamicTapRating(float percent, float speed) => GetDynamicSkillRating(percent, speed, tapPerfDict);
-        public float GetDynamicAccRating(float percent, float speed) => GetDynamicSkillRating(percent, speed, accPerfDict);
+        public float GetDynamicAimRating(int hitCount, float speed) => GetDynamicSkillRating(hitCount, speed, aimPerfDict);
+        public float GetDynamicTapRating(int hitCount, float speed) => GetDynamicSkillRating(hitCount, speed, tapPerfDict);
+        public float GetDynamicAccRating(int hitCount, float speed) => GetDynamicSkillRating(hitCount, speed, accPerfDict);
 
-        private float GetDynamicSkillRating(float percent, float speed, List<DataVector>[] skillRatingMatrix)
+        private float GetDynamicSkillRating(int hitCount, float speed, List<DataVector>[] skillRatingMatrix)
         {
             var index = (int)((speed - 0.5f) / .25f);
 
-            if (skillRatingMatrix[index].Count <= 1 || percent <= 0)
+            if (skillRatingMatrix[index].Count <= 1 || hitCount <= 0)
                 return 0;
             else if (speed % .25f == 0)
-                return CalcSkillRating(percent, skillRatingMatrix[index]);
+                return CalcSkillRating(hitCount, skillRatingMatrix[index]);
 
-            var r1 = CalcSkillRating(percent, skillRatingMatrix[index]);
-            var r2 = CalcSkillRating(percent, skillRatingMatrix[index + 1]);
+            var r1 = CalcSkillRating(hitCount, skillRatingMatrix[index]);
+            var r2 = CalcSkillRating(hitCount, skillRatingMatrix[index + 1]);
 
             var minSpeed = Utils.GAME_SPEED[index];
             var maxSpeed = Utils.GAME_SPEED[index + 1];
@@ -267,9 +265,14 @@ namespace TootTallyDiffCalcTTV2
         public const float MAP = .05f;
         public const float MACC = .5f;
 
-        private float CalcSkillRating(float percent, List<DataVector> skillRatingArray)
+        private float CalcSkillRating(int hitCount, List<DataVector> skillRatingArray)
         {
             int maxRange;
+
+            float percent = 1f;
+            if (hitCount < _chart.noteCount)
+                percent = (float)hitCount / _chart.noteCount;
+
             if (percent <= MACC)
                 maxRange = (int)Math.Clamp(skillRatingArray.Count * (percent * (MAP / MACC)), 1, skillRatingArray.Count);
             else
@@ -287,10 +290,10 @@ namespace TootTallyDiffCalcTTV2
         public static readonly float[] FLWeights = { .55f, .02f };
         public const float BIAS = .75f;
 
-        public float GetDynamicDiffRating(float percent, float gamespeed, string[] modifiers = null)
+        public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)
         {
-            var aimRating = GetDynamicAimRating(percent, gamespeed);
-            var tapRating = GetDynamicTapRating(percent, gamespeed);
+            var aimRating = GetDynamicAimRating(hitCount, gamespeed);
+            var tapRating = GetDynamicTapRating(hitCount, gamespeed);
 
             if (aimRating == 0 && tapRating == 0) return 0f;
 

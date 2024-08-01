@@ -5,7 +5,7 @@ namespace TootTallyDiffCalcTTV2
     public class TootTallyDiffCalcTTV2
     {
         public static List<Chart> chartList;
-        public const string VERSION_LABEL = "4.3.5";
+        public const string VERSION_LABEL = "5.0.0";
         public const string BUILD_DATE = "31072024";
         public static StreamWriter fileWriter;
 
@@ -127,10 +127,10 @@ namespace TootTallyDiffCalcTTV2
                 WriteToConsoleAndFile($"MaxScore: {chart.maxScore}");
                 WriteToConsoleAndFile($"GameMaxScore: {chart.gameMaxScore}");
                 WriteToConsoleAndFile($"NoteCount: {chart.noteCount}");
-                WriteToConsoleAndFile($"TestScore:{chart.GetDynamicDiffRating(1, .8f)}");
-                WriteToConsoleAndFile($"TestScore2:{chart.GetDynamicDiffRating(1, .3f)}");
-                WriteToConsoleAndFile($"TestScore3:{Utils.CalculateScoreTT(chart, 1f, .8f)}");
-                WriteToConsoleAndFile($"TestScore4:{Utils.CalculateScoreTT(chart, 1f, .3f)}");
+                WriteToConsoleAndFile($"TestScore:{chart.GetDynamicDiffRating(1, (int)(chart.noteCount * .8f))}");
+                WriteToConsoleAndFile($"TestScore2:{chart.GetDynamicDiffRating(1, (int)(chart.noteCount * .3f))}");
+                WriteToConsoleAndFile($"TestScore3:{Utils.CalculateScoreTT(chart, 1f, (int)(chart.noteCount * .8f), .8f)}");
+                WriteToConsoleAndFile($"TestScore4:{Utils.CalculateScoreTT(chart, 1f, (int)(chart.noteCount * .3f), .3f)}");
                 WriteToConsoleAndFile("=====================================================================================================");
                 for (int i = 0; i < 7; i++)
                     DisplayAtSpeed(chart, i);

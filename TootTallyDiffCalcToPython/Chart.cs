@@ -144,7 +144,7 @@ namespace TootTallyDiffCalcTTV2
         //Returns the lerped star rating
         public float GetDiffRating(float speed) => performances.GetDiffRating(Math.Clamp(speed, 0.5f, 2f));
 
-        public float GetDynamicDiffRating(float speed, float percent, string[] modifiers = null) => performances.GetDynamicDiffRating(percent, speed, modifiers);
+        public float GetDynamicDiffRating(float speed, int hitCount, string[] modifiers = null) => performances.GetDynamicDiffRating(hitCount, speed, modifiers);
 
         public float GetLerpedStarRating(float speed) => performances.GetDiffRating(Math.Clamp(speed, 0.5f, 2f));
 
