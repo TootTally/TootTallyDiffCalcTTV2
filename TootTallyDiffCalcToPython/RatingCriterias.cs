@@ -13,7 +13,7 @@
                 errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.NoteCount, 0, 0, chart.notesDict[2].Count));
 
             //Warning on chart being having less than 10s worth of notes
-            if (lastNote.position + lastNote.length - chart.notesDict[2][0].position <= 10f)
+            if (lastNote.position + lastNote.length - chart.notesDict[2][1].position <= 10f)
                 errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.MapLength, chart.notesDict[2].Count - 1, lastNote.position + lastNote.length, lastNote.position + lastNote.length));
 
             Note previousNote = new Note(-1, 0,0,0,0,0,false);
@@ -30,9 +30,8 @@
                 else if (currentNote.position <= 1.25f)
                     errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.HotStart, i, currentNote.position, currentNote.position));
 
-
-                float length = currentNote.length;
-                for (int j = i + 1; noteList.Count < j && noteList[j].isSlider && !previousNote.isSlider; j++) //Only calc full length if you just got into a multi segmented slide
+                var length = currentNote.length;
+                for (int j = i + 1; noteList.Count > j && noteList[j - 1].isSlider; j++) //Only calc full length if you just got into a multi segmented slide
                     length += noteList[j].length;
 
                 //notes shorter than: error at 4.5454s, warning at 4.4s, notice at 4s
@@ -42,7 +41,7 @@
                     errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.LongNote, i, currentNote.position, length));
 
                 if (currentNote.length < 0.001f)
-                    errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.ShortNote, i, currentNote.position, length));
+                    errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.ShortNote, i, currentNote.position, currentNote.length));
 
                 //sliders velocity more than 3k u/s, warning 2k, Notice at 1k
                 var pitchDelta = MathF.Abs(currentNote.pitchDelta);
@@ -100,7 +99,6 @@
 
                 previousNote = currentNote;
             }
-
             return errors;
         }
 
