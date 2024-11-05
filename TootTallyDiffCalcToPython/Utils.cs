@@ -31,13 +31,13 @@
         }
 
         public static float CalculateScoreTT(Chart chart, ScoreData score) =>
-            CalculateBaseTT(chart.GetDynamicDiffRating(score.replay_speed, score.GetHitCount, score.modifiers)) * GetMultiplier(score.percentage);
+            CalculateBaseTT(chart.GetDynamicDiffRating(score.replay_speed, score.GetHitCount, score.modifiers)) * GetMultiplier(score.percentage, score.modifiers);
 
         public static float CalculateScoreTT(Chart chart, float replaySpeed, int hitCount, float percent, string[] modifiers = null) =>
-            CalculateBaseTT(chart.GetDynamicDiffRating(replaySpeed, hitCount, modifiers)) * GetMultiplier(percent);
+            CalculateBaseTT(chart.GetDynamicDiffRating(replaySpeed, hitCount, modifiers)) * GetMultiplier(percent, modifiers);
 
-        public static float CalculateScoreTT(float[] diffRatings, float replaySpeed, float percent) =>
-            CalculateBaseTT(LerpDiff(diffRatings, replaySpeed)) * GetMultiplier(percent);
+        public static float CalculateScoreTT(float[] diffRatings, float replaySpeed, float percent, string[] modifiers = null) =>
+            CalculateBaseTT(LerpDiff(diffRatings, replaySpeed)) * GetMultiplier(percent, modifiers);
 
         //OLD: https://www.desmos.com/calculator/6rle1shggs
         public static readonly Dictionary<float, float> accToMultDict = new Dictionary<float, float>()
@@ -64,14 +64,40 @@
             { 0, 0 },
         };
 
-        public static float GetMultiplier(float percent)
+        public static readonly Dictionary<float, float> ezAccToMultDict = new Dictionary<float, float>()
         {
+             { 1f, 15.4f },    //{ 1f, 15.4f },    //{ 1f, 15.4f },    //V3{ 1f, 10.4f },   //V2{ 1f, 7.5f },   //V1{ 1f, 7.1f },
+             { .999f, 12.6f }, //{ .999f, 12.6f }, //{ .999f, 12.6f }, //{ .999f, 10.2f },  //{ .999f, 6.05f }, //{ .999f, 7f },
+             { .996f, 11.6f }, //{ .996f, 10.8f }, //{ .996f, 10.6f }, //{ .996f, 9.8f },   //{ .996f, 5.05f }, //{ .996f, 6.8f },
+             { .993f, 11f }, //{ .993f, 10.6f },  //{ .993f, 9.2f },  //{ .993f, 9.5f },   //{ .993f, 4.35f }, //{ .993f, 6.6f },
+             { .99f, 10.6f },   //{ .99f, 9.2f },   //{ .99f, 8.6f },   //{ .99f, 9.2f },    //{ .99f, 3.8f },   //{ .99f, 6.4f },
+             { .985f, 10f },  //{ .985f, 8.6f },    //{ .985f, 8f },    //{ .985f, 8.75f },  //{ .985f, 3.4f },  //{ .985f, 6.2f },
+             { .98f, 9.6f },   //{ .98f, 8.2f },   //{ .98f, 7.6f },   //{ .98f, 8.3f },    //{ .98f, 3f },     //{ .98f, 5.9f },
+             { .97f, 9f },   //{ .97f, 7.6f },     //{ .97f, 7f },     //{ .97f, 7.5f },    //{ .97f, 2.5f },   //{ .97f, 5.45f },
+             { .96f, 8.6f },   //{ .96f, 7.2f },   //{ .96f, 6.6f },   //{ .96f, 6.6f },    //{ .96f, 2.2f },   //{ .96f, 5.15f },
+             { .95f, 8.3f },   //{ .95f, 6.9f },   //{ .95f, 6.2f },   //{ .95f, 6f },      //{ .95f, 2f },     //{ .95f, 4.75f },
+             { .925f, 7.6f },  //{ .925f, 6.1f },  //{ .925f, 5.5f },  //{ .925f, 5.25f },  //{ .925f, 1.75f }, //{ .925f, 4.1f },
+             { .9f, 6.8f },    //{ .9f, 5.5f },    //{ .9f, 4.8f },    //{ .9f, 4.65f },    //{ .9f, 1.55f },   //{ .9f, 3.6f },
+             { .875f, 6.2f },  //{ .875f, 4.8f },  //{ .875f, 4.2f },  //{ .875f, 4.35f },  //{ .875f, 1.45f }, //{ .875f, 3.1f },
+             { .85f, 5.6f },   //{ .85f, 4.2f },   //{ .85f, 3.8f },   //{ .85f, 3.9f },    //{ .85f, 1.3f },   //{ .85f, 2.6f },
+             { .8f, 4.6f },    //{ .8f, 3.3f },      //{ .8f, 3f },      //{ .8f, 3.45f },    //{ .8f, 1.15f },   //{ .8f, 2.1f },
+             { .7f, 2.5f },   //{ .7f, 1.95f },   //{ .7f, 1.75f },   //{ .7f, 2.25f },    //{ .7f, .75f },    //{ .7f, 1.4f },
+             { .6f, 1.12f },    //{ .6f, .84f },    //{ .6f, .84f },    //{ .6f, 1.23f },    //{ .6f, .41f },    //{ .6f, .8f },
+             { .5f, .22f },    //{ .5f, .22f },    //{ .5f, .22f },    //{ .5f, .33f },     //{ .5f, .11f },    //{ .5f, .4f },
+             { .25f, .03f },   //{ .25f, .03f },   //{ .25f, .03f },   //{ .25f, .06f },    //{ .25f, .02f },   //{ .25f, .05f },
+             { 0, 0 },         //{ 0, 0 },         //{ 0, 0 },         //{ 0, 0 },          //{ 0, 0 },         //{ 0, 0 },
+        };
+
+        public static float GetMultiplier(float percent, string[] modifiers = null)
+        {
+            var multDict = (modifiers != null && modifiers.Contains("EZ")) ? ezAccToMultDict : accToMultDict;
             int index;
-            for (index = 1; index < accToMultDict.Count && accToMultDict.Keys.ElementAt(index) > percent; index++) ;
-            var percMax = accToMultDict.Keys.ElementAt(index);
-            var percMin = accToMultDict.Keys.ElementAt(index - 1);
+            for (index = 1; index < multDict.Count && multDict.Keys.ElementAt(index) > percent; index++) ;
+            var percMax = multDict.Keys.ElementAt(index);
+            var percMin = multDict.Keys.ElementAt(index - 1);
             var by = (percent - percMin) / (percMax - percMin);
-            return Lerp(accToMultDict[percMin], accToMultDict[percMax], by);
+            var mult = Lerp(multDict[percMin], multDict[percMax], by);
+            return mult;
         }
 
         public static float LerpDiff(float[] diffRatings, float speed)

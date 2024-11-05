@@ -288,6 +288,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static readonly float[] HDWeights = { .34f, .02f };
         public static readonly float[] FLWeights = { .55f, .02f };
+        public static readonly float[] EZWeights = { -.55f, -.02f };
         public const float BIAS = .75f;
 
         public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)
@@ -311,6 +312,13 @@ namespace TootTallyDiffCalcTTV2
                     aimPow += FLWeights[0];
                     tapPow += FLWeights[1];
                 }
+                if (modifiers.Contains("EZ"))
+                {
+                    aimPow += EZWeights[0];
+                    tapPow += EZWeights[1];
+                }
+                if (aimPow <= 0) aimPow = .01f;
+                if (tapPow <= 0) tapPow = .01f;
 
                 aimRating *= aimPow;
                 tapRating *= tapPow;
