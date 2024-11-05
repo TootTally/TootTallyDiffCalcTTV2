@@ -316,8 +316,8 @@ namespace TootTallyDiffCalcTTV2
                 }
                 if (isEZModeOn)
                 {
-                    aimPow -= EZWeights[0];
-                    tapPow -= EZWeights[1];
+                    aimPow += EZWeights[0];
+                    tapPow += EZWeights[1];
                 }
 
                 if (aimPow <= 0) aimPow = .01f;
