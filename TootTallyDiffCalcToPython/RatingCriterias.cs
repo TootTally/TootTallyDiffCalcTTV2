@@ -6,7 +6,9 @@
         public static List<RatingError> GetRatingErrors(Chart chart)
         {
             List<RatingError> errors = new List<RatingError>();
+
             var lastNote = chart.notesDict[2].Last();
+            HashSet<float> seenNotes = new HashSet<float>();
 
             //Warning on note count smaller than 24 notes
             if (chart.notesDict[2].Count < 24)
@@ -17,11 +19,26 @@
                 errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.MapLength, chart.notesDict[2].Count - 1, lastNote.position + lastNote.length, lastNote.position + lastNote.length));
 
             Note previousNote = new Note(-1, 0,0,0,0,0,false);
-            var noteList = chart.notesDict[2].GetRange(1,chart.notesDict[2].Count - 1); //Remove first fake note
+            var noteList = chart.notesDict[2].OrderBy(x => x.position).ToList().GetRange(1,chart.notesDict[2].Count - 1); //Remove first fake note
             for (int i = 0; i < noteList.Count - 1; i++)
             {
                 Note currentNote = noteList[i];
                 Note nextNote = noteList[i + 1];
+
+                
+
+                if (seenNotes.Contains(currentNote.position))
+                {
+                    errors.Add(new RatingError(ErrorLevel.Error, ErrorType.DuplicatedNote, i, currentNote.position, currentNote.position));
+                    continue;
+                }
+                seenNotes.Add(currentNote.position);
+
+                if (nextNote.position + .001f < currentNote.position + currentNote.length)
+                {
+                    errors.Add(new RatingError(ErrorLevel.Error, ErrorType.GhostNote, i + 1, nextNote.position, nextNote.position));
+                    continue;
+                }
 
                 //ONLY APPLICABLE TO UPCOMING OR NEWLY RATED CHARTS
                 //notes starts within: error at shorter than 0.8s, warning at 1.25f
@@ -143,6 +160,8 @@
             NoteDelta,
             SliderHead,
             SliderTail,
+            DuplicatedNote,
+            GhostNote,
         }
     }
 }

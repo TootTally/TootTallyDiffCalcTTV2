@@ -45,7 +45,7 @@ namespace TootTallyDiffCalcTTV2
                     }
                     Console.ForegroundColor = ConsoleColor.Red;
                     WriteToConsoleAndFile("=================================UNRATABLE CHARTS=================================");
-                    foreach (var chart in chartList.Where(chart => chart.ratingErrors.Any(error => error.errorLevel == RatingCriterias.ErrorLevel.Error && error.errorType != RatingCriterias.ErrorType.HotStart)))
+                    foreach (var chart in chartList.Where(chart => chart.ratingErrors.Any(error => error.errorLevel == RatingCriterias.ErrorLevel.Error && error.errorType != RatingCriterias.ErrorType.HotStart && error.errorType == RatingCriterias.ErrorType.GhostNote)))
                         WriteToConsoleAndFile($"{chart.name} - {chart.ratingErrors.Where(error => error.errorLevel == RatingCriterias.ErrorLevel.Error).Count()} errors");
                     Console.ForegroundColor = ConsoleColor.White;
                 }
@@ -58,9 +58,9 @@ namespace TootTallyDiffCalcTTV2
         public static List<string> GetAllTmbsPaths(string path)
         {
             List<string> paths = new List<string>();
-            paths.AddRange(Directory.GetFiles(path).Where(s => s.Contains(".tmb")));
+            paths.AddRange(Directory.GetFiles(path).Where(s => s.EndsWith(".tmb")));
             foreach (string directory in Directory.GetDirectories(path))
-                paths.AddRange(Directory.GetFiles(directory).Where(s => s.Contains(".tmb")));
+                paths.AddRange(Directory.GetFiles(directory).Where(s => s.EndsWith(".tmb")));
             return paths;
         }
 

@@ -28,8 +28,16 @@ namespace TootTallyDiffCalcTTV2
         {
             StreamReader reader = new StreamReader(path);
             string json = reader.ReadToEnd();
-            Chart chart = JsonConvert.DeserializeObject<Chart>(json);
-            chart.OnDeserialize();
+            Chart chart = null;
+            try
+            {
+                chart = JsonConvert.DeserializeObject<Chart>(json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"song {path} is not a valid json");
+            }
+            chart?.OnDeserialize();
             reader.Close();
             return chart;
         }
