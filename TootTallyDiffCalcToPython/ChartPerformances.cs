@@ -58,11 +58,11 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 375;
-        public const float TAP_DIV = 200;
+        public const float AIM_DIV = 430;
+        public const float TAP_DIV = 300;
         public const float ACC_DIV = 375;
         public const float AIM_END = 750;
-        public const float TAP_END = 15;
+        public const float TAP_END = 25;
         public const float ACC_END = 900;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
@@ -140,8 +140,8 @@ namespace TootTallyDiffCalcTTV2
                 if (i > 0)
                 {
                     var endDivider = 61f - MathF.Min(currentNote.position - noteList[i - 1].position, 5f) * 12f;
-                    var aimThreshold = MathF.Pow(aimStrain, 1.08f) * 1.2f;
-                    var tapThreshold = MathF.Pow(tapStrain, 1.08f) * 1.2f;
+                    var aimThreshold = MathF.Sqrt(aimStrain) * 2.5f;
+                    var tapThreshold = MathF.Sqrt(tapStrain) * 2.5f;
                     if (aimEndurance >= aimThreshold)
                         ComputeEnduranceDecay(ref aimEndurance, (aimEndurance - aimThreshold) / endDivider);
                     if (tapEndurance >= tapThreshold)
@@ -163,8 +163,8 @@ namespace TootTallyDiffCalcTTV2
         //public static bool IsSlider(float deltaTime) => !(MathF.Round(deltaTime, 3) > 0);
 
         //https://www.desmos.com/calculator/e4kskdn8mu
-        public static float ComputeStrain(float strain) => a * MathF.Pow(strain + 1, -.016f * MathF.E) - a - (5f * strain) / a;
-        private const float a = -40f;
+        public static float ComputeStrain(float strain) => a * MathF.Pow(strain + 1, -.04f * MathF.E) - a - (5f * strain) / a;
+        private const float a = -60f;
 
         public static void ComputeEnduranceDecay(ref float endurance, float distanceFromLastNote)
         {
@@ -174,13 +174,13 @@ namespace TootTallyDiffCalcTTV2
         #region AIM
         public static float CalcAimStrain(float distance, float weight, float deltaTime)
         {
-            var speed = (distance * .85f) / MathF.Pow(deltaTime, 1.35f);
+            var speed = (distance * .55f) / MathF.Pow(deltaTime, 1.45f);
             return speed * weight;
         }
 
         public static float CalcAimEndurance(float distance, float weight, float deltaTime)
         {
-            var speed = ((distance * .25f) / MathF.Pow(deltaTime, 1.15f)) / (AIM_END * MUL_END);
+            var speed = ((distance * .2f) / MathF.Pow(deltaTime, 1.15f)) / (AIM_END * MUL_END);
             return speed * weight;
         }
         #endregion
