@@ -162,9 +162,9 @@ namespace TootTallyDiffCalcTTV2
         }
         //public static bool IsSlider(float deltaTime) => !(MathF.Round(deltaTime, 3) > 0);
 
-        //https://www.desmos.com/calculator/e4kskdn8mu
-        public static float ComputeStrain(float strain) => a * MathF.Pow(strain + 1, -.04f * MathF.E) - a - (5f * strain) / a;
-        private const float a = -60f;
+        //https://www.desmos.com/calculator/tkunxszosp
+        public static float ComputeStrain(float strain) => a * MathF.Pow(strain + 1, -.0325f * MathF.E) - a - (3f * strain) / a;
+        private const float a = -90f;
 
         public static void ComputeEnduranceDecay(ref float endurance, float distanceFromLastNote)
         {
