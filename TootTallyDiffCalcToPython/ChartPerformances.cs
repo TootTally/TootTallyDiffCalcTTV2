@@ -58,12 +58,12 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 500;
-        public const float TAP_DIV = 350;
+        public const float AIM_DIV = 85;
+        public const float TAP_DIV = 30;
         public const float ACC_DIV = 375;
         public const float AIM_END = 800;
         public const float TAP_END = 25;
-        public const float ACC_END = 900;
+        public const float ACC_END = 500;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
 
@@ -117,7 +117,7 @@ namespace TootTallyDiffCalcTTV2
                     if (deltaSlideSum != 0)
                     {
                         //Acc Calc
-                        aimStrain += ComputeStrain(CalcAccStrain(lengthSum, deltaSlideSum, weight)) / ACC_DIV;
+                        aimStrain += CalcAccStrain(lengthSum, deltaSlideSum, weight);
                         aimEndurance += CalcAccEndurance(lengthSum, deltaSlideSum, weight);
                     }
 
@@ -127,16 +127,17 @@ namespace TootTallyDiffCalcTTV2
 
                     if (noteMoved)
                     {
-                        aimStrain += ComputeStrain(CalcAimStrain(aimDistance, weight, deltaTime)) / AIM_DIV;
+                        aimStrain += CalcAimStrain(aimDistance, weight, deltaTime);
                         aimEndurance += CalcAimEndurance(aimDistance, weight, deltaTime);
                     }
 
                     //Tap Calc
                     var tapDelta = nextNote.position - prevNote.position;
-                    tapStrain += ComputeStrain(CalcTapStrain(tapDelta, weight, aimDistance)) / TAP_DIV;
+                    tapStrain += CalcTapStrain(tapDelta, weight, aimDistance);
                     tapEndurance += CalcTapEndurance(tapDelta, weight, aimDistance);
                 }
-
+                aimStrain = ComputeStrain(aimStrain) / AIM_DIV;
+                tapStrain = ComputeStrain(tapStrain) / TAP_DIV;
                 if (i > 0)
                 {
                     var endDivider = 61f - MathF.Min(currentNote.position - noteList[i - 1].position, 5f) * 12f;
