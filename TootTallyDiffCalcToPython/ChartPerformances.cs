@@ -58,12 +58,12 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 100;
-        public const float TAP_DIV = 25;
+        public const float AIM_DIV = 90;
+        public const float TAP_DIV = 22;
         public const float ACC_DIV = 375;
-        public const float AIM_END = 800;
-        public const float TAP_END = 35;
-        public const float ACC_END = 500;
+        public const float AIM_END = 900;
+        public const float TAP_END = 50;
+        public const float ACC_END = 400;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
 
