@@ -77,15 +77,16 @@
                     var noteVelocity = noteDelta / noteDistance;
 
                     //note velocity more than 6k u/s, warning 3k, notice at 1k
-                    if (noteVelocity >= 7500f)
+                    if (noteVelocity >= 9500f)
                         errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteVelocity, i, currentNote.position, noteVelocity));
-                    else if (noteVelocity >= 4500f)
+                    else if (noteVelocity >= 6500f)
                         errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.NoteVelocity, i, currentNote.position, noteVelocity));
 
-                    //note spacing smaller than: error at 2/60th, warning at 2/45th, notice at 2/25th
-                    if (noteDistance <= 2d / 60f)
+                    //note spacing smaller than: error at 2/120th, warning at 2/90th
+                    //Changed from 60 to 120 on 1/12/2025
+                    if (noteDistance <= 2d / 120f)
                         errors.Add(new RatingError(ErrorLevel.Error, ErrorType.Spacing, i, currentNote.position, noteDistance));
-                    else if (noteDistance <= 2d / 45f)
+                    else if (noteDistance <= 2d / 90f)
                         errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.Spacing, i, currentNote.position, noteDistance));
                 }
 
