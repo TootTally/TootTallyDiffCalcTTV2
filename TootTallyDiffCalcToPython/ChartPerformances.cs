@@ -58,12 +58,12 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 80;
-        public const float TAP_DIV = 22;
+        public const float AIM_DIV = 65;
+        public const float TAP_DIV = 25;
         public const float ACC_DIV = 375;
-        public const float AIM_END = 900;
+        public const float AIM_END = 600;
         public const float TAP_END = 50;
-        public const float ACC_END = 400;
+        public const float ACC_END = 600;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
 
@@ -112,7 +112,7 @@ namespace TootTallyDiffCalcTTV2
 
                     }
                     var aimDistance = MathF.Abs(nextNote.pitchStart - prevNote.pitchEnd);
-                    weight += (aimDistance + 1f) / CHEESABLE_THRESHOLD / 400f;
+                    //weight += (aimDistance + 1f) / CHEESABLE_THRESHOLD / 400f;
                     weightSum += weight;
 
                     if (deltaSlideSum != 0)
@@ -141,8 +141,8 @@ namespace TootTallyDiffCalcTTV2
                 if (i > 0)
                 {
                     var endDivider = 61f - MathF.Min(currentNote.position - noteList[i - 1].position, 5f) * 12f;
-                    var aimThreshold = MathF.Sqrt(aimStrain + (tapStrain * .2f)) * 3f; //Intentionally inverted so tap and aim together buff charts a lot 
-                    var tapThreshold = MathF.Sqrt(tapStrain + (aimStrain * .2f)) * 3f;
+                    var aimThreshold = MathF.Sqrt(aimStrain) * 3f;
+                    var tapThreshold = MathF.Sqrt(tapStrain) * 3f;
                     if (aimEndurance >= aimThreshold)
                         ComputeEnduranceDecay(ref aimEndurance, (aimEndurance - aimThreshold) / endDivider);
                     if (tapEndurance >= tapThreshold)
@@ -155,7 +155,7 @@ namespace TootTallyDiffCalcTTV2
                     break;
                 }
 
-
+                weightSum += Utils.FastPow(aimStrain + tapStrain, 2);
                 aimPerfDict[speedIndex].Add(new DataVector(currentNote.position, aimStrain, aimEndurance, weightSum));
                 tapPerfDict[speedIndex].Add(new DataVector(currentNote.position, tapStrain, tapEndurance, weightSum));
                 accPerfDict[speedIndex].Add(new DataVector(currentNote.position, 0, 0, 1));
@@ -270,6 +270,7 @@ namespace TootTallyDiffCalcTTV2
         {
             int maxRange;
 
+            hitCount += _chart.noteCount / 20;
             float percent = 1f;
             if (hitCount < _chart.noteCount)
                 percent = (float)hitCount / _chart.noteCount;
