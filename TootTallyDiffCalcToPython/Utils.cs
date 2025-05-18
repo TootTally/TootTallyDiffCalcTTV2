@@ -26,11 +26,6 @@
         //https://www.desmos.com/calculator/rhwqyp21nr
         public static float CalculateBaseTT(float starRating)
         {
-            return (.03f * FastPow(starRating, 3)) - (.13f * FastPow(starRating, 2)) + (10f * starRating) + .05f;
-            //y = .03x^3 -.13x^2 + 10x + .05
-        }
-        public static float CalculateBaseTTOLD(float starRating)
-        {
             return (0.5f * FastPow(starRating, 2) + (7f * starRating) + 0.05f);
             //y = (0.7x^2 + 12x + 0.05)/1.5
         }
