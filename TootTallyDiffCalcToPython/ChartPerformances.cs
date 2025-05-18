@@ -58,9 +58,9 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 55;
-        public const float TAP_DIV = 20;
-        public const float ACC_DIV = 375;
+        public const float AIM_DIV = 20;
+        public const float TAP_DIV = 26;
+        public const float ACC_DIV = 2;
         public const float AIM_END = 800;
         public const float TAP_END = 35;
         public const float ACC_END = 300;
@@ -79,7 +79,7 @@ namespace TootTallyDiffCalcTTV2
                 float weightSum = 0f;
                 var aimStrain = 0f;
                 var tapStrain = 0f;
-                for (int j = i - 1; j >= 0 && noteCount < 64 && (MathF.Abs(currentNote.position - noteList[j].position) <= MAX_DIST || i - j <= 2); j--)
+                for (int j = i - 1; j >= 0 && noteCount < 32 && (MathF.Abs(currentNote.position - noteList[j].position) <= MAX_DIST || i - j <= 2); j--)
                 {
                     var prevNote = noteList[j];
                     var nextNote = noteList[j + 1];
@@ -175,7 +175,7 @@ namespace TootTallyDiffCalcTTV2
         #region AIM
         public static float CalcAimStrain(float distance, float weight, float deltaTime)
         {
-            var speed = (distance * .5f) / MathF.Pow(deltaTime, 1.18f);
+            var speed = MathF.Sqrt(distance) / MathF.Pow(deltaTime, 1.11f);
             return speed * weight;
         }
 
@@ -203,7 +203,7 @@ namespace TootTallyDiffCalcTTV2
         #region ACC
         public static float CalcAccStrain(float lengthSum, float slideDelta, float weight)
         {
-            var speed = (slideDelta * .75f) / MathF.Pow(lengthSum, 1.18f);
+            var speed = MathF.Sqrt(slideDelta) / MathF.Pow(lengthSum, 1.18f);
             return speed * weight;
         }
 
@@ -284,12 +284,12 @@ namespace TootTallyDiffCalcTTV2
             return analytics.perfWeightedAverage + .01f;
         }
 
-        public const float AIM_WEIGHT = 1.35f;
-        public const float TAP_WEIGHT = 1.12f;
+        public const float AIM_WEIGHT = 1.25f;
+        public const float TAP_WEIGHT = 1f;
 
         public static readonly float[] HDWeights = { .33f, .02f };
         public static readonly float[] FLWeights = { .55f, .02f };
-        public static readonly float[] EZWeights = { -.3f, -.2f };
+        public static readonly float[] EZWeights = { -.25f, -.2f };
         public const float BIAS = .75f;
 
         public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)
