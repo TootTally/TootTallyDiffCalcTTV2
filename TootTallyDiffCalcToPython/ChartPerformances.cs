@@ -289,7 +289,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static readonly float[] HDWeights = { .12f, .1f };
         public static readonly float[] FLWeights = { .25f, .08f };
-        public static readonly float[] EZWeights = { -.25f, -.25f };
+        public static readonly float[] EZWeights = { -.25f, -.18f };
         public const float BIAS = .75f;
 
         public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)
