@@ -57,11 +57,11 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 15;
-        public const float TAP_DIV = 15;
+        public const float AIM_DIV = 10;
+        public const float TAP_DIV = 10;
         public const float ACC_DIV = 2;
-        public const float AIM_END = 800;
-        public const float TAP_END = 35;
+        public const float AIM_END = 1000;
+        public const float TAP_END = 40;
         public const float ACC_END = 300;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
@@ -175,13 +175,13 @@ namespace TootTallyDiffCalcTTV2
         #region AIM
         public static float CalcAimStrain(float distance, float weight, float deltaTime)
         {
-            var speed = MathF.Sqrt(distance + 10) / MathF.Pow(deltaTime, 1.11f);
+            var speed = MathF.Sqrt(distance + 5) / MathF.Pow(deltaTime, 1.08f);
             return speed * weight;
         }
 
         public static float CalcAimEndurance(float distance, float weight, float deltaTime)
         {
-            var speed = ((distance * .1f) / MathF.Pow(deltaTime, 1.07f)) / (AIM_END * MUL_END);
+            var speed = (MathF.Sqrt(distance * .5f) / MathF.Pow(deltaTime, 1.07f)) / (AIM_END * MUL_END);
             return speed * weight;
         }
         #endregion
@@ -189,13 +189,13 @@ namespace TootTallyDiffCalcTTV2
         #region TAP
         public static float CalcTapStrain(float tapDelta, float weight, float aimDistance)
         {
-            var baseValue = MathF.Min(Utils.Lerp(3f, 5.5f, aimDistance / CHEESABLE_THRESHOLD), 6f);
+            var baseValue = MathF.Min(Utils.Lerp(2f, 5.5f, aimDistance / CHEESABLE_THRESHOLD), 6f);
             return (baseValue / MathF.Pow(tapDelta, 1.3f)) * weight;
         }
 
         public static float CalcTapEndurance(float tapDelta, float weight, float aimDistance)
         {
-            var baseValue = MathF.Min(Utils.Lerp(.1f, .20f, aimDistance / CHEESABLE_THRESHOLD), .25f);
+            var baseValue = MathF.Min(Utils.Lerp(.08f, .20f, aimDistance / CHEESABLE_THRESHOLD), .25f);
             return (baseValue / MathF.Pow(tapDelta, 1.06f)) / (TAP_END * MUL_END) * weight;
         }
         #endregion
