@@ -60,8 +60,8 @@ namespace TootTallyDiffCalcTTV2
         public const float AIM_DIV = 11;
         public const float TAP_DIV = 18;
         public const float ACC_DIV = 4;
-        public const float AIM_END = 750;
-        public const float TAP_END = 50;
+        public const float AIM_END = 550;
+        public const float TAP_END = 35;
         public const float ACC_END = 300;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
@@ -175,13 +175,13 @@ namespace TootTallyDiffCalcTTV2
         #region AIM
         public static float CalcAimStrain(float distance, float weight, float deltaTime)
         {
-            var speed = MathF.Sqrt(distance + 5) / MathF.Pow(deltaTime, 1.35f);
+            var speed = MathF.Sqrt(distance + 25) * .75f / MathF.Pow(deltaTime, 1.35f);
             return speed * weight;
         }
 
         public static float CalcAimEndurance(float distance, float weight, float deltaTime)
         {
-            var speed = (MathF.Sqrt(distance * .5f) / MathF.Pow(deltaTime, 1.09f)) / (AIM_END * MUL_END);
+            var speed = MathF.Sqrt(distance + 5) * .5f / MathF.Pow(deltaTime, 1.09f)) / (AIM_END * MUL_END);
             return speed * weight;
         }
         #endregion
