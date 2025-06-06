@@ -181,7 +181,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static float CalcAimEndurance(float distance, float weight, float deltaTime)
         {
-            var speed = MathF.Sqrt(distance + 5) * .5f / MathF.Pow(deltaTime, 1.09f)) / (AIM_END * MUL_END);
+            var speed = MathF.Sqrt(distance + 5) * .5f / MathF.Pow(deltaTime, 1.09f) / (AIM_END * MUL_END);
             return speed * weight;
         }
         #endregion
