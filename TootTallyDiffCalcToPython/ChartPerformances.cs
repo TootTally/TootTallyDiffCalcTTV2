@@ -57,12 +57,12 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 11;
+        public const float AIM_DIV = 14;
         public const float TAP_DIV = 18;
         public const float ACC_DIV = 4;
-        public const float AIM_END = 550;
+        public const float AIM_END = 250;
         public const float TAP_END = 35;
-        public const float ACC_END = 300;
+        public const float ACC_END = 200;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
 
@@ -175,13 +175,13 @@ namespace TootTallyDiffCalcTTV2
         #region AIM
         public static float CalcAimStrain(float distance, float weight, float deltaTime)
         {
-            var speed = MathF.Sqrt(distance + 25) * .75f / MathF.Pow(deltaTime, 1.35f);
+            var speed = MathF.Sqrt(distance + 50) * .75f / MathF.Pow(deltaTime, 1.35f);
             return speed * weight;
         }
 
         public static float CalcAimEndurance(float distance, float weight, float deltaTime)
         {
-            var speed = MathF.Sqrt(distance + 5) * .5f / MathF.Pow(deltaTime, 1.09f) / (AIM_END * MUL_END);
+            var speed = MathF.Sqrt(distance + 50) * .35f / MathF.Pow(deltaTime, 1.09f) / (AIM_END * MUL_END);
             return speed * weight;
         }
         #endregion
@@ -203,13 +203,13 @@ namespace TootTallyDiffCalcTTV2
         #region ACC
         public static float CalcAccStrain(float lengthSum, float slideDelta, float weight)
         {
-            var speed = MathF.Sqrt(slideDelta) / MathF.Pow(lengthSum, 1.11f);
+            var speed = MathF.Sqrt(slideDelta + 50) * .75f / MathF.Pow(lengthSum, 1.25f);
             return speed * weight;
         }
 
         public float CalcAccEndurance(float lengthSum, float slideDelta, float weight)
         {
-            var speed = ((slideDelta * .25f) / MathF.Pow(lengthSum, 1.05f)) / (ACC_END * MUL_END);
+            var speed = MathF.Sqrt(slideDelta + 50) * .25f / MathF.Pow(lengthSum, 1.08f) / (ACC_END * MUL_END);
             return speed * weight;
         }
         #endregion
