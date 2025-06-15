@@ -57,12 +57,12 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 14;
-        public const float TAP_DIV = 18;
-        public const float ACC_DIV = 4;
+        public const float AIM_DIV = 110;
+        public const float TAP_DIV = 110;
+        public const float ACC_DIV = 6;
         public const float AIM_END = 250;
-        public const float TAP_END = 35;
-        public const float ACC_END = 200;
+        public const float TAP_END = 25;
+        public const float ACC_END = 250;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
 
@@ -141,7 +141,7 @@ namespace TootTallyDiffCalcTTV2
                 {
                     var endDivider = 61f - MathF.Min(currentNote.position - noteList[i - 1].position, 5f) * 12f;
                     var aimThreshold = MathF.Sqrt(aimStrain) * 1.5f;
-                    var tapThreshold = MathF.Sqrt(tapStrain) * 3f;
+                    var tapThreshold = MathF.Sqrt(tapStrain) * 1.5f;
                     if (aimEndurance >= aimThreshold)
                         ComputeEnduranceDecay(ref aimEndurance, (aimEndurance - aimThreshold) / endDivider);
                     if (tapEndurance >= tapThreshold)
@@ -164,8 +164,10 @@ namespace TootTallyDiffCalcTTV2
 
         //https://www.desmos.com/calculator/tkunxszosp
         //public static float ComputeStrain(float strain) => a * MathF.Pow(strain + 1, -.0325f * MathF.E) - a - (3f * strain) / a;
-        public static float ComputeStrain(float strain) => a * MathF.Pow(strain + 1, -.05f * MathF.E) - a - (MathF.Pow(strain, 1.1f) / a);
-        private const float a = -35f;
+        public static float ComputeStrain(float strain) => a * MathF.Pow(strain + 1, b * MathF.E) - a - (MathF.Pow(strain, p) / a);
+        private const float a = -40f;
+        private const float b = -.05f;
+        private const float p = 1.4f;
 
         public static void ComputeEnduranceDecay(ref float endurance, float distanceFromLastNote)
         {
@@ -175,13 +177,13 @@ namespace TootTallyDiffCalcTTV2
         #region AIM
         public static float CalcAimStrain(float distance, float weight, float deltaTime)
         {
-            var speed = MathF.Sqrt(distance + 50) * .75f / MathF.Pow(deltaTime, 1.35f);
+            var speed = MathF.Sqrt(distance + 50) * .75f / MathF.Pow(deltaTime, 1.38f);
             return speed * weight;
         }
 
         public static float CalcAimEndurance(float distance, float weight, float deltaTime)
         {
-            var speed = MathF.Sqrt(distance + 50) * .35f / MathF.Pow(deltaTime, 1.09f) / (AIM_END * MUL_END);
+            var speed = MathF.Sqrt(distance + 50) * .25f / MathF.Pow(deltaTime, 1.08f) / (AIM_END * MUL_END);
             return speed * weight;
         }
         #endregion
@@ -189,14 +191,14 @@ namespace TootTallyDiffCalcTTV2
         #region TAP
         public static float CalcTapStrain(float tapDelta, float weight, float aimDistance)
         {
-            var baseValue = MathF.Min(Utils.Lerp(4f, 5.5f, aimDistance / CHEESABLE_THRESHOLD), 6f);
-            return (baseValue / MathF.Pow(tapDelta, 1.45f)) * weight;
+            var baseValue = MathF.Min(Utils.Lerp(1.25f, 4.5f, aimDistance / CHEESABLE_THRESHOLD), 6f);
+            return (baseValue / MathF.Pow(tapDelta, 1.38f)) * weight;
         }
 
         public static float CalcTapEndurance(float tapDelta, float weight, float aimDistance)
         {
             var baseValue = MathF.Min(Utils.Lerp(.14f, .20f, aimDistance / CHEESABLE_THRESHOLD), .25f);
-            return (baseValue / MathF.Pow(tapDelta, 1.08f)) / (TAP_END * MUL_END) * weight;
+            return (baseValue / MathF.Pow(tapDelta, 1.12f)) / (TAP_END * MUL_END) * weight;
         }
         #endregion
 
@@ -304,7 +306,7 @@ namespace TootTallyDiffCalcTTV2
                 var aimPow = 1f;
                 var tapPow = 1f;
                 var isEZModeOn = modifiers.Contains("EZ");
-                var mult = isEZModeOn ? .5f : 1f;
+                var mult = isEZModeOn ? .4f : 1f;
                 if (modifiers.Contains("HD"))
                 {
                     aimPow += HDWeights[0] * mult;
