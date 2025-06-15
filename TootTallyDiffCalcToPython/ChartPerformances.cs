@@ -57,12 +57,12 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 110;
+        public const float AIM_DIV = 115;
         public const float TAP_DIV = 150;
         public const float ACC_DIV = 35;
-        public const float AIM_END = 225;
+        public const float AIM_END = 125;
         public const float TAP_END = 25;
-        public const float ACC_END = 400;
+        public const float ACC_END = 250;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
 
@@ -100,7 +100,7 @@ namespace TootTallyDiffCalcTTV2
                         nextNote = noteList[j + 1];
 
                         if (prevNote.pitchDelta == 0)
-                            lengthSum += prevNote.length * .75f;
+                            lengthSum += prevNote.length * .85f;
                         else
                         {
                             var deltaSlide = MathF.Abs(prevNote.pitchDelta);
@@ -211,7 +211,7 @@ namespace TootTallyDiffCalcTTV2
 
         public float CalcAccEndurance(float lengthSum, float slideDelta, float weight)
         {
-            var speed = slideDelta * 1.25f / MathF.Pow(lengthSum, 1.08f) / (ACC_END * MUL_END);
+            var speed = slideDelta * .75f / MathF.Pow(lengthSum, 1.08f) / (ACC_END * MUL_END);
             return speed * weight;
         }
         #endregion
@@ -290,8 +290,8 @@ namespace TootTallyDiffCalcTTV2
         public const float TAP_WEIGHT = 1f;
 
         public static readonly float[] HDWeights = { .12f, .1f };
-        public static readonly float[] FLWeights = { .16f, .09f };
-        public static readonly float[] EZWeights = { -.33f, -.28f };
+        public static readonly float[] FLWeights = { .35f, .09f };
+        public static readonly float[] EZWeights = { -.32f, -.28f };
         public const float BIAS = .75f;
 
         public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)
