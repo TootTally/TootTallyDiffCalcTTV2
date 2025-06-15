@@ -57,9 +57,9 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 110;
-        public const float TAP_DIV = 110;
-        public const float ACC_DIV = 6;
+        public const float AIM_DIV = 90;
+        public const float TAP_DIV = 160;
+        public const float ACC_DIV = 10;
         public const float AIM_END = 250;
         public const float TAP_END = 25;
         public const float ACC_END = 250;
@@ -141,7 +141,7 @@ namespace TootTallyDiffCalcTTV2
                 {
                     var endDivider = 61f - MathF.Min(currentNote.position - noteList[i - 1].position, 5f) * 12f;
                     var aimThreshold = MathF.Sqrt(aimStrain) * 1.5f;
-                    var tapThreshold = MathF.Sqrt(tapStrain) * 1.5f;
+                    var tapThreshold = MathF.Sqrt(tapStrain) * 5f;
                     if (aimEndurance >= aimThreshold)
                         ComputeEnduranceDecay(ref aimEndurance, (aimEndurance - aimThreshold) / endDivider);
                     if (tapEndurance >= tapThreshold)
@@ -191,7 +191,7 @@ namespace TootTallyDiffCalcTTV2
         #region TAP
         public static float CalcTapStrain(float tapDelta, float weight, float aimDistance)
         {
-            var baseValue = MathF.Min(Utils.Lerp(1.25f, 4.5f, aimDistance / CHEESABLE_THRESHOLD), 6f);
+            var baseValue = MathF.Min(Utils.Lerp(3.25f, 5.5f, aimDistance / CHEESABLE_THRESHOLD), 6f);
             return (baseValue / MathF.Pow(tapDelta, 1.38f)) * weight;
         }
 
@@ -291,7 +291,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static readonly float[] HDWeights = { .12f, .1f };
         public static readonly float[] FLWeights = { .16f, .09f };
-        public static readonly float[] EZWeights = { -.22f, -.20f };
+        public static readonly float[] EZWeights = { -.35f, -.30f };
         public const float BIAS = .75f;
 
         public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)
