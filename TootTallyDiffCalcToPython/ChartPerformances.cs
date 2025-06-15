@@ -57,12 +57,12 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 90;
-        public const float TAP_DIV = 160;
-        public const float ACC_DIV = 10;
-        public const float AIM_END = 250;
+        public const float AIM_DIV = 110;
+        public const float TAP_DIV = 150;
+        public const float ACC_DIV = 35;
+        public const float AIM_END = 225;
         public const float TAP_END = 25;
-        public const float ACC_END = 250;
+        public const float ACC_END = 400;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
 
@@ -91,7 +91,7 @@ namespace TootTallyDiffCalcTTV2
                     var lengthSum = prevNote.length;
                     var deltaSlideSum = MathF.Abs(prevNote.pitchDelta);
                     if (deltaSlideSum <= CHEESABLE_THRESHOLD)
-                        deltaSlideSum *= .35f;
+                        deltaSlideSum *= .15f;
                     while (prevNote.isSlider)
                     {
                         if (j-- <= 0)
@@ -100,13 +100,13 @@ namespace TootTallyDiffCalcTTV2
                         nextNote = noteList[j + 1];
 
                         if (prevNote.pitchDelta == 0)
-                            lengthSum += prevNote.length * .85f;
+                            lengthSum += prevNote.length * .75f;
                         else
                         {
                             var deltaSlide = MathF.Abs(prevNote.pitchDelta);
                             lengthSum += prevNote.length;
                             if (deltaSlide <= CHEESABLE_THRESHOLD)
-                                deltaSlide *= .25f;
+                                deltaSlide *= .15f;
                             deltaSlideSum += deltaSlide;
                         }
 
@@ -205,13 +205,13 @@ namespace TootTallyDiffCalcTTV2
         #region ACC
         public static float CalcAccStrain(float lengthSum, float slideDelta, float weight)
         {
-            var speed = MathF.Sqrt(slideDelta + 50) * .75f / MathF.Pow(lengthSum, 1.25f);
+            var speed = slideDelta * 5f / MathF.Pow(lengthSum, 1.16f);
             return speed * weight;
         }
 
         public float CalcAccEndurance(float lengthSum, float slideDelta, float weight)
         {
-            var speed = MathF.Sqrt(slideDelta + 50) * .25f / MathF.Pow(lengthSum, 1.08f) / (ACC_END * MUL_END);
+            var speed = slideDelta * 1.25f / MathF.Pow(lengthSum, 1.08f) / (ACC_END * MUL_END);
             return speed * weight;
         }
         #endregion
@@ -291,7 +291,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static readonly float[] HDWeights = { .12f, .1f };
         public static readonly float[] FLWeights = { .16f, .09f };
-        public static readonly float[] EZWeights = { -.35f, -.30f };
+        public static readonly float[] EZWeights = { -.33f, -.28f };
         public const float BIAS = .75f;
 
         public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)
