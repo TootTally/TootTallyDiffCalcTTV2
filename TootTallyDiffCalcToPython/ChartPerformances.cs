@@ -59,10 +59,10 @@ namespace TootTallyDiffCalcTTV2
 
         public const float AIM_DIV = 65;
         public const float TAP_DIV = 70;
-        public const float ACC_DIV = 11;
+        public const float ACC_DIV = 15;
         public const float AIM_END = 75;
         public const float TAP_END = 26;
-        public const float ACC_END = 140;
+        public const float ACC_END = 125;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
 
