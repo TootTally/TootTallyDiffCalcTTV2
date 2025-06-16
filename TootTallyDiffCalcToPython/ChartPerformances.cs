@@ -61,7 +61,7 @@ namespace TootTallyDiffCalcTTV2
         public const float TAP_DIV = 90;
         public const float ACC_DIV = 15;
         public const float AIM_END = 80;
-        public const float TAP_END = 30;
+        public const float TAP_END = 25;
         public const float ACC_END = 125;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
@@ -197,8 +197,8 @@ namespace TootTallyDiffCalcTTV2
 
         public static float CalcTapEndurance(float tapDelta, float weight, float aimDistance)
         {
-            var baseValue = MathF.Min(Utils.Lerp(.14f, .20f, aimDistance / CHEESABLE_THRESHOLD), .25f);
-            return (baseValue / MathF.Pow(tapDelta, 1.12f)) / (TAP_END * MUL_END) * weight;
+            var baseValue = MathF.Min(Utils.Lerp(.11f, .20f, aimDistance / CHEESABLE_THRESHOLD), .25f);
+            return (baseValue / MathF.Pow(tapDelta, 1.08f)) / (TAP_END * MUL_END) * weight;
         }
         #endregion
 
@@ -291,7 +291,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static readonly float[] HDWeights = { .12f, .1f };
         public static readonly float[] FLWeights = { .35f, .09f };
-        public static readonly float[] EZWeights = { -.26f, -.24f };
+        public static readonly float[] EZWeights = { -.22f, -.28f };
         public const float BIAS = .75f;
 
         public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)
