@@ -57,12 +57,12 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 90;
-        public const float TAP_DIV = 90;
-        public const float ACC_DIV = 15;
-        public const float AIM_END = 80;
-        public const float TAP_END = 25;
-        public const float ACC_END = 125;
+        public const float AIM_DIV = 65;
+        public const float TAP_DIV = 70;
+        public const float ACC_DIV = 11;
+        public const float AIM_END = 75;
+        public const float TAP_END = 26;
+        public const float ACC_END = 140;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
 
@@ -167,7 +167,7 @@ namespace TootTallyDiffCalcTTV2
         public static float ComputeStrain(float strain) => a * MathF.Pow(strain + 1, b * MathF.E) - a - (MathF.Pow(strain, p) / a);
         private const float a = -35f;
         private const float b = -.5f;
-        private const float p = 1.3f;
+        private const float p = 1.25f;
 
         public static void ComputeEnduranceDecay(ref float endurance, float distanceFromLastNote)
         {
