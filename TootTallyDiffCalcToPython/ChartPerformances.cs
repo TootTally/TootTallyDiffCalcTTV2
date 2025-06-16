@@ -57,12 +57,12 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 115;
-        public const float TAP_DIV = 145;
-        public const float ACC_DIV = 16;
-        public const float AIM_END = 125;
-        public const float TAP_END = 26;
-        public const float ACC_END = 250;
+        public const float AIM_DIV = 90;
+        public const float TAP_DIV = 90;
+        public const float ACC_DIV = 15;
+        public const float AIM_END = 80;
+        public const float TAP_END = 30;
+        public const float ACC_END = 125;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
 
@@ -165,9 +165,9 @@ namespace TootTallyDiffCalcTTV2
         //https://www.desmos.com/calculator/tkunxszosp
         //public static float ComputeStrain(float strain) => a * MathF.Pow(strain + 1, -.0325f * MathF.E) - a - (3f * strain) / a;
         public static float ComputeStrain(float strain) => a * MathF.Pow(strain + 1, b * MathF.E) - a - (MathF.Pow(strain, p) / a);
-        private const float a = -40f;
+        private const float a = -35f;
         private const float b = -.5f;
-        private const float p = 1.4f;
+        private const float p = 1.3f;
 
         public static void ComputeEnduranceDecay(ref float endurance, float distanceFromLastNote)
         {
@@ -291,7 +291,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static readonly float[] HDWeights = { .12f, .1f };
         public static readonly float[] FLWeights = { .35f, .09f };
-        public static readonly float[] EZWeights = { -.28f, -.26f };
+        public static readonly float[] EZWeights = { -.26f, -.24f };
         public const float BIAS = .75f;
 
         public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)
