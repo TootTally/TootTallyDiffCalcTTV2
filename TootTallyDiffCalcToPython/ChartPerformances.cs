@@ -57,8 +57,8 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 65;
-        public const float TAP_DIV = 70;
+        public const float AIM_DIV = 35;
+        public const float TAP_DIV = 25;
         public const float ACC_DIV = 15;
         public const float AIM_END = 75;
         public const float TAP_END = 26;
@@ -78,7 +78,7 @@ namespace TootTallyDiffCalcTTV2
                 float weightSum = 0f;
                 var aimStrain = 0f;
                 var tapStrain = 0f;
-                for (int j = i - 1; j >= 0 && noteCount < 64 && (MathF.Abs(currentNote.position - noteList[j].position) <= MAX_DIST || i - j <= 2); j--)
+                for (int j = i - 1; j >= 0 && noteCount < 6 && (MathF.Abs(currentNote.position - noteList[j].position) <= MAX_DIST || i - j <= 2); j--)
                 {
                     var prevNote = noteList[j];
                     var nextNote = noteList[j + 1];
@@ -141,7 +141,7 @@ namespace TootTallyDiffCalcTTV2
                 {
                     var endDivider = 61f - MathF.Min(currentNote.position - noteList[i - 1].position, 5f) * 12f;
                     var aimThreshold = MathF.Sqrt(aimStrain) * 1.5f;
-                    var tapThreshold = MathF.Sqrt(tapStrain) * 5f;
+                    var tapThreshold = MathF.Sqrt(tapStrain) * 2.5f;
                     if (aimEndurance >= aimThreshold)
                         ComputeEnduranceDecay(ref aimEndurance, (aimEndurance - aimThreshold) / endDivider);
                     if (tapEndurance >= tapThreshold)
@@ -290,8 +290,8 @@ namespace TootTallyDiffCalcTTV2
         public const float TAP_WEIGHT = 1f;
 
         public static readonly float[] HDWeights = { .12f, .1f };
-        public static readonly float[] FLWeights = { .35f, .09f };
-        public static readonly float[] EZWeights = { -.22f, -.28f };
+        public static readonly float[] FLWeights = { .20f, .15f };
+        public static readonly float[] EZWeights = { -.2f, -.25f };
         public const float BIAS = .75f;
 
         public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)

@@ -25,8 +25,6 @@
                 Note currentNote = noteList[i];
                 Note nextNote = noteList[i + 1];
 
-                
-
                 if (seenNotes.Contains(currentNote.position))
                 {
                     errors.Add(new RatingError(ErrorLevel.Error, ErrorType.DuplicatedNote, i, currentNote.position, currentNote.position));
@@ -70,7 +68,7 @@
                     else if (pitchVelocity >= 2000f)
                         errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.SliderVelocity, i, currentNote.position, pitchVelocity));
                 }
-                if (!noteList[i].isSlider)
+                if (!currentNote.isSlider)
                 {
                     var noteDistance = nextNote.position - (currentNote.position + currentNote.length);
                     var noteDelta = MathF.Abs(currentNote.pitchEnd - nextNote.pitchStart);
@@ -89,6 +87,28 @@
                     else if (noteDistance <= 2d / 90f)
                         errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.Spacing, i, currentNote.position, noteDistance));
                 }
+                else
+                {
+                    //Pitch start out of play space
+                    if (MathF.Abs(currentNote.pitchStart) > 180d)
+                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteStartOutOfBound, i, currentNote.position, currentNote.pitchStart));
+
+                    //Pitch end out of play space
+                    if (currentNote.pitchDelta != 0 && MathF.Abs(currentNote.pitchEnd) > 180d)
+                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteEndOutOfBound, i, currentNote.position, currentNote.pitchEnd));
+
+                    //If there's 2 flat sliders next to eachother that can be simplified
+                    if (currentNote.pitchDelta == 0 && nextNote.pitchDelta == 0)
+                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.DuplicateSlider, i, currentNote.position, currentNote.position));
+
+                    //If the current slider's end is not the same pitch as the next slider's start
+                    if (currentNote.pitchEnd != nextNote.pitchStart)
+                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.SliderConnection, i, currentNote.position, currentNote.position));
+
+                    //If pitch delta is different than intended
+                    if (Math.Round(currentNote.pitchDelta, 3) != Math.Round(currentNote.pitchEnd - currentNote.pitchStart, 3))
+                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteDelta, i, currentNote.position, (currentNote.pitchEnd - currentNote.pitchStart) - currentNote.pitchDelta));
+                }
 
                 if (!(previousNote.isSlider && currentNote.isSlider))
                 {
@@ -99,19 +119,6 @@
                     if (nextNote.isSlider && nextNote.length <= .04f)
                         errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.SliderTail, i, currentNote.position, nextNote.length));
                 }
-
-
-                //Pitch start out of play space
-                if (MathF.Abs(currentNote.pitchStart) > 180d)
-                    errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteStartOutOfBound, i, currentNote.position, currentNote.pitchStart));
-
-                //Pitch end out of play space
-                if (currentNote.pitchDelta != 0 && MathF.Abs(currentNote.pitchEnd) > 180d)
-                    errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteEndOutOfBound, i, currentNote.position, currentNote.pitchEnd));
-
-                //If pitch delta is different than intended
-                if (Math.Round(currentNote.pitchDelta, 3) != Math.Round(currentNote.pitchEnd - currentNote.pitchStart, 3))
-                    errors.Add(new RatingError(ErrorLevel.Error, ErrorType.NoteDelta, i, currentNote.position, (currentNote.pitchEnd - currentNote.pitchStart) - currentNote.pitchDelta));
 
                 if (errors.Count > 500) break; //Don't check for more errors if too many notes lol
 
@@ -161,7 +168,9 @@
             NoteDelta,
             SliderHead,
             SliderTail,
+            SliderConnection,
             DuplicatedNote,
+            DuplicateSlider,
             GhostNote,
         }
     }
