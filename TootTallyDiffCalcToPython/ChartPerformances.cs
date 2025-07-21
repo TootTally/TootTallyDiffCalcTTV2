@@ -57,10 +57,10 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 31;
+        public const float AIM_DIV = 37;
         public const float TAP_DIV = 27;
         public const float ACC_DIV = 20;
-        public const float AIM_END = 55;
+        public const float AIM_END = 30;
         public const float TAP_END = 10;
         public const float ACC_END = 125;
         public const float MUL_END = 50;
@@ -174,7 +174,7 @@ namespace TootTallyDiffCalcTTV2
         private const float b = -.5f;
         private const float p = 1.25f;
 
-        public static float ComputeVelocityDebuff(float lastVelocity, float currentVelocity) => MathF.Min(MathF.Abs(currentVelocity - lastVelocity) * .03f + .5f, 1f);
+        public static float ComputeVelocityDebuff(float lastVelocity, float currentVelocity) => MathF.Min(MathF.Abs(currentVelocity - lastVelocity) * .03f + .4f, 1f);
 
         public static void ComputeEnduranceDecay(ref float endurance, float distanceFromLastNote)
         {
