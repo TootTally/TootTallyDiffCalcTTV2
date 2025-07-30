@@ -57,12 +57,12 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 55;
-        public const float TAP_DIV = 25;
+        public const float AIM_DIV = 40;
+        public const float TAP_DIV = 35;
         public const float ACC_DIV = 20;
-        public const float AIM_END = 80;
-        public const float TAP_END = 20;
-        public const float ACC_END = 125;
+        public const float AIM_END = 50;
+        public const float TAP_END = 12;
+        public const float ACC_END = 180;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
 
@@ -184,13 +184,13 @@ namespace TootTallyDiffCalcTTV2
         #region AIM
         public static float CalcAimStrain(float distance, float weight, float deltaTime)
         {
-            var speed = MathF.Sqrt(distance + 10) * 1.68f / MathF.Pow(deltaTime, 1.38f);
+            var speed = MathF.Sqrt(distance + 50) * .95f / MathF.Pow(deltaTime, 1.38f);
             return speed * weight;
         }
 
         public static float CalcAimEndurance(float distance, float weight, float deltaTime)
         {
-            var speed = MathF.Sqrt(distance + 5) * .6f / MathF.Pow(deltaTime, 1.08f) / (AIM_END * MUL_END);
+            var speed = MathF.Sqrt(distance + 25) * .35f / MathF.Pow(deltaTime, 1.08f) / (AIM_END * MUL_END);
             return speed * weight;
         }
         #endregion
@@ -204,7 +204,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static float CalcTapEndurance(float tapDelta, float weight, float aimDistance)
         {
-            var baseValue = MathF.Min(Utils.Lerp(.11f, .20f, aimDistance / CHEESABLE_THRESHOLD), .25f);
+            var baseValue = MathF.Min(Utils.Lerp(.14f, .20f, aimDistance / CHEESABLE_THRESHOLD), .25f);
             return (baseValue / MathF.Pow(tapDelta, 1.08f)) / (TAP_END * MUL_END) * weight;
         }
         #endregion

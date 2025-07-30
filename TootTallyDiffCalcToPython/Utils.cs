@@ -46,9 +46,9 @@ namespace TootTallyDiffCalcTTV2
         //OLD: https://www.desmos.com/calculator/6rle1shggs
         public static readonly Dictionary<float, float> accToMultDict = new Dictionary<float, float>()
         {
-            { 1f, 40.2f },
-            { .999f, 32.4f },
-            { .996f, 27.2f },
+            { 1f, 36.4f },
+            { .999f, 30.2f },
+            { .996f, 26.2f },
             { .993f, 23.2f },
             { .99f, 20.5f },
             { .985f, 18.1f },
@@ -70,7 +70,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static readonly Dictionary<float, float> ezAccToMultDict = new Dictionary<float, float>()
         {
-             { 1f, 15.2f },   
+             { 1f, 12.8f },   
              { .999f, 11.2f },
              { .996f, 10.8f },
              { .993f, 10.4f },
