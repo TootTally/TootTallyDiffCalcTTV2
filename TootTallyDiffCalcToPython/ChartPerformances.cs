@@ -199,14 +199,14 @@ namespace TootTallyDiffCalcTTV2
         #region TAP
         public static float CalcTapStrain(float tapDelta, float weight, float aimDistance)
         {
-            var baseValue = MathF.Min(Utils.Lerp(5f, 5.5f, aimDistance / CHEESABLE_THRESHOLD), 6f);
-            return (baseValue / MathF.Pow(tapDelta, 1.38f)) * weight;
+            var baseValue = MathF.Min(Utils.Lerp(3.5f, 4.5f, aimDistance / CHEESABLE_THRESHOLD), 5f);
+            return (baseValue / MathF.Pow(tapDelta, 1.46f)) * weight;
         }
 
         public static float CalcTapEndurance(float tapDelta, float weight, float aimDistance)
         {
-            var baseValue = MathF.Min(Utils.Lerp(.14f, .20f, aimDistance / CHEESABLE_THRESHOLD), .25f);
-            return (baseValue / MathF.Pow(tapDelta, 1.08f)) / (TAP_END * MUL_END) * weight;
+            var baseValue = MathF.Min(Utils.Lerp(.09f, .20f, aimDistance / CHEESABLE_THRESHOLD), .25f);
+            return (baseValue / MathF.Pow(tapDelta, 1.13f)) / (TAP_END * MUL_END) * weight;
         }
         #endregion
 
