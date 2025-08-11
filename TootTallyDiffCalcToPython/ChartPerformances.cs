@@ -57,11 +57,11 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 38;
-        public const float TAP_DIV = 32;
+        public const float AIM_DIV = 44;
+        public const float TAP_DIV = 30;
         public const float ACC_DIV = 20;
-        public const float AIM_END = 25;
-        public const float TAP_END = 10;
+        public const float AIM_END = 50;
+        public const float TAP_END = 12;
         public const float ACC_END = 180;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
@@ -144,14 +144,13 @@ namespace TootTallyDiffCalcTTV2
                 tapStrain = ComputeStrain(tapStrain) / TAP_DIV;
                 if (i > 0)
                 {
-                    var endTapDivider = 61f - MathF.Min(currentNote.position - noteList[i - 1].position, 5f) * 12f;
-                    var endAimDivider = MathF.Min(MathF.Abs(currentNote.pitchEnd - currentNote.pitchStart), CHEESABLE_THRESHOLD) / CHEESABLE_THRESHOLD * 51f + 10f;
+                    var endDivider = 61f - MathF.Min(currentNote.position - noteList[i - 1].position, 5f) * 12f;
                     var aimThreshold = MathF.Sqrt(aimStrain) * 1.5f;
-                    var tapThreshold = MathF.Sqrt(tapStrain) * 3.5f;
+                    var tapThreshold = MathF.Sqrt(tapStrain) * 2.5f;
                     if (aimEndurance >= aimThreshold)
-                        ComputeEnduranceDecay(ref aimEndurance, (aimEndurance - aimThreshold) / endAimDivider);
+                        ComputeEnduranceDecay(ref aimEndurance, (aimEndurance - aimThreshold) / endDivider);
                     if (tapEndurance >= tapThreshold)
-                        ComputeEnduranceDecay(ref tapEndurance, (tapEndurance - tapThreshold) / endTapDivider);
+                        ComputeEnduranceDecay(ref tapEndurance, (tapEndurance - tapThreshold) / endDivider);
                 }
 
                 if (float.IsNaN(aimStrain) || float.IsNaN(aimEndurance) || float.IsNaN(tapStrain) || float.IsNaN(tapEndurance))
@@ -298,8 +297,8 @@ namespace TootTallyDiffCalcTTV2
         public const float TAP_WEIGHT = 1f;
 
         public static readonly float[] HDWeights = { .11f, .09f };
-        public static readonly float[] FLWeights = { .3f, .1f };
-        public static readonly float[] EZWeights = { -.18f, -.10f };
+        public static readonly float[] FLWeights = { .2f, .15f };
+        public static readonly float[] EZWeights = { -.15f, -.14f };
         public const float BIAS = .75f;
 
         public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)
