@@ -57,8 +57,8 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 44;
-        public const float TAP_DIV = 30;
+        public const float AIM_DIV = 40;
+        public const float TAP_DIV = 35;
         public const float ACC_DIV = 20;
         public const float AIM_END = 50;
         public const float TAP_END = 12;
@@ -92,7 +92,7 @@ namespace TootTallyDiffCalcTTV2
                     var lengthSum = prevNote.length;
                     var deltaSlideSum = MathF.Abs(prevNote.pitchDelta);
                     if (deltaSlideSum <= CHEESABLE_THRESHOLD)
-                        deltaSlideSum *= .35f;
+                        deltaSlideSum *= .15f;
                     while (prevNote.isSlider)
                     {
                         if (j-- <= 0)
@@ -107,7 +107,7 @@ namespace TootTallyDiffCalcTTV2
                             var deltaSlide = MathF.Abs(prevNote.pitchDelta);
                             lengthSum += prevNote.length;
                             if (deltaSlide <= CHEESABLE_THRESHOLD)
-                                deltaSlide *= .25f;
+                                deltaSlide *= .15f;
                             deltaSlideSum += deltaSlide;
                         }
 
