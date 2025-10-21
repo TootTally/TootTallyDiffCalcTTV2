@@ -57,20 +57,23 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 44;
+        public const float AIM_DIV = 45;
         public const float TAP_DIV = 50;
         public const float ACC_DIV = 20;
         public const float AIM_END = 35;
-        public const float TAP_END = 12;
+        public const float TAP_END = 8;
         public const float ACC_END = 180;
         public const float MUL_END = 50;
         public const float MAX_DIST = 8f;
+        public const float VEL_DIV = 25f;
 
         public void CalculatePerformances(int speedIndex)
         {
             var noteList = _chart.notesDict[speedIndex];
             var aimEndurance = 0f;
             var tapEndurance = 0f;
+            var lastVelocity = 0f;
+            var velocityDebuff = 1f;
             for (int i = 0; i < NOTE_COUNT; i++) //Main Forward Loop
             {
                 var currentNote = noteList[i];
@@ -78,7 +81,6 @@ namespace TootTallyDiffCalcTTV2
                 float weightSum = 0f;
                 var aimStrain = 0f;
                 var tapStrain = 0f;
-                var lastVelocity = 0f;
                 for (int j = i - 1; j >= 0 && noteCount < 6 && (MathF.Abs(currentNote.position - noteList[j].position) <= MAX_DIST || i - j <= 2); j--)
                 {
                     var prevNote = noteList[j];
@@ -123,20 +125,19 @@ namespace TootTallyDiffCalcTTV2
 
                     //Aim Calc
                     var aimDistance = MathF.Abs(nextNote.pitchStart - prevNote.pitchEnd);
-                    var noteMoved = aimDistance != 0 || deltaSlideSum != 0;
                     var currVelocity = MathF.Abs(aimDistance / deltaTime);
-                    var velocityDebuff = ComputeVelocityDebuff(lastVelocity, currVelocity);
+                    var velocityDebuffDelta = ComputeVelocityDebuff(lastVelocity, currVelocity) - velocityDebuff;
+                    velocityDebuff += velocityDebuffDelta / VEL_DIV;
 
-                    if (noteMoved)
+                    if (aimDistance != 0)
                     {
                         aimStrain += CalcAimStrain(aimDistance, weight, deltaTime) * velocityDebuff;
                         aimEndurance += CalcAimEndurance(aimDistance, weight, deltaTime) * velocityDebuff;
                     }
 
                     //Tap Calc
-                    var tapDelta = nextNote.position - prevNote.position;
-                    tapStrain += CalcTapStrain(tapDelta, weight, aimDistance) * velocityDebuff;
-                    tapEndurance += CalcTapEndurance(tapDelta, weight, aimDistance) * velocityDebuff;
+                    tapStrain += CalcTapStrain(deltaTime, weight, aimDistance) * velocityDebuff;
+                    tapEndurance += CalcTapEndurance(deltaTime, weight, aimDistance) * velocityDebuff;
 
                     lastVelocity = currVelocity;
                 }
@@ -299,7 +300,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static readonly float[] HDWeights = { .11f, .09f };
         public static readonly float[] FLWeights = { .3f, .10f };
-        public static readonly float[] EZWeights = { -.25f, -.25f };
+        public static readonly float[] EZWeights = { -.32f, -.32f };
         public const float BIAS = .75f;
 
         public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)
@@ -404,7 +405,7 @@ namespace TootTallyDiffCalcTTV2
 
             public void CalculateWeightSum(List<DataVector> dataVectorList, float songLengthMult)
             {
-                for(int i = 0; i < dataVectorList.Count; i++)
+                for (int i = 0; i < dataVectorList.Count; i++)
                     weightSum += dataVectorList[i].weight;
                 weightSum *= songLengthMult;
             }
