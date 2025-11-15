@@ -59,7 +59,7 @@ namespace TootTallyDiffCalcTTV2
 
         public const float AIM_DIV = 18;
         public const float AIM_END = 40;
-        public const float TAP_DIV = 18;
+        public const float TAP_DIV = 20;
         public const float TAP_END = 12;
         public const float ACC_DIV = 20;
         public const float ACC_END = 180;
@@ -300,7 +300,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static readonly float[] HDWeights = { .11f, .09f };
         public static readonly float[] FLWeights = { .3f, .10f };
-        public static readonly float[] EZWeights = { -.06f, -.11f };
+        public static readonly float[] EZWeights = { -.04f, -.08f };
         public const float BIAS = .75f;
 
         public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)
