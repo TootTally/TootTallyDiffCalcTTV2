@@ -57,10 +57,10 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 14;
-        public const float AIM_END = 25;
-        public const float TAP_DIV = 17;
-        public const float TAP_END = 6;
+        public const float AIM_DIV = 17;
+        public const float AIM_END = 30;
+        public const float TAP_DIV = 20;
+        public const float TAP_END = 10;
         public const float ACC_DIV = 20;
         public const float ACC_END = 180;
         public const float MUL_END = 50;
@@ -81,7 +81,7 @@ namespace TootTallyDiffCalcTTV2
                 float weightSum = 0f;
                 var aimStrain = 0f;
                 var tapStrain = 0f;
-                for (int j = i - 1; j >= 0 && noteCount < 8 && (MathF.Abs(currentNote.position - noteList[j].position) <= MAX_DIST || i - j <= 2); j--)
+                for (int j = i - 1; j >= 0 && noteCount < 12 && (MathF.Abs(currentNote.position - noteList[j].position) <= MAX_DIST || i - j <= 2); j--)
                 {
                     var prevNote = noteList[j];
                     var nextNote = noteList[j + 1];
@@ -148,7 +148,7 @@ namespace TootTallyDiffCalcTTV2
                     var endTapDivider = 61f - MathF.Min(currentNote.position - noteList[i - 1].position, 5f) * 12f;
                     var endAimDivider = MathF.Min(MathF.Abs(currentNote.pitchEnd - currentNote.pitchStart), CHEESABLE_THRESHOLD) / CHEESABLE_THRESHOLD * 51f + 10f;
                     var aimThreshold = MathF.Sqrt(aimStrain) * 1.25f;//MathF.Pow(aimStrain, .8f) * 1.25f;
-                    var tapThreshold = MathF.Sqrt(tapStrain) * 1.25f;//MathF.Pow(tapStrain, .8f) * 3.5f;
+                    var tapThreshold = MathF.Sqrt(tapStrain) * 1.75f;//MathF.Pow(tapStrain, .8f) * 3.5f;
                     if (aimEndurance >= aimThreshold)
                         ComputeEnduranceDecay(ref aimEndurance, (aimEndurance - aimThreshold) / endAimDivider);
                     if (tapEndurance >= tapThreshold)
@@ -186,13 +186,13 @@ namespace TootTallyDiffCalcTTV2
         #region AIM
         public static float CalcAimStrain(float distance, float weight, float deltaTime)
         {
-            var speed = MathF.Pow(distance, .45f) * .4f / MathF.Pow(deltaTime, 1.32f);
+            var speed = MathF.Pow(distance, .55f) * .5f / MathF.Pow(deltaTime, 1.28f);
             return speed * weight;
         }
 
         public static float CalcAimEndurance(float distance, float weight, float deltaTime)
         {
-            var speed = MathF.Pow(distance, .45f) * .15f / MathF.Pow(deltaTime, 1.08f) / (AIM_END * MUL_END);
+            var speed = MathF.Pow(distance, .55f) * .2f / MathF.Pow(deltaTime, 1.08f) / (AIM_END * MUL_END);
             return speed * weight;
         }
         #endregion
@@ -201,7 +201,7 @@ namespace TootTallyDiffCalcTTV2
         public static float CalcTapStrain(float tapDelta, float weight, float aimDistance)
         {
             var baseValue = MathF.Min(Utils.Lerp(3.25f, 5.5f, aimDistance / CHEESABLE_THRESHOLD), 6f);
-            return (baseValue / MathF.Pow(tapDelta, 1.32f)) * weight;
+            return (baseValue / MathF.Pow(tapDelta, 1.28f)) * weight;
         }
 
         public static float CalcTapEndurance(float tapDelta, float weight, float aimDistance)
@@ -283,7 +283,7 @@ namespace TootTallyDiffCalcTTV2
 
             float percent = 1f;
             if (hitCount < _chart.noteCount)
-                percent = MathF.Min((float)hitCount * 1.1f / _chart.noteCount, 1f);
+                percent = MathF.Min((float)hitCount / _chart.noteCount, 1f);
 
             if (percent <= MACC)
                 maxRange = (int)Math.Clamp(skillRatingArray.Count * (percent * (MAP / MACC)), 1, skillRatingArray.Count);
@@ -300,7 +300,7 @@ namespace TootTallyDiffCalcTTV2
 
         public static readonly float[] HDWeights = { .11f, .09f };
         public static readonly float[] FLWeights = { .3f, .10f };
-        public static readonly float[] EZWeights = { -.0f, -.0f };
+        public static readonly float[] EZWeights = { -.04f, -.02f };
         public const float BIAS = .75f;
 
         public float GetDynamicDiffRating(int hitCount, float gamespeed, string[] modifiers = null)
