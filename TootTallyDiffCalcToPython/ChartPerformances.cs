@@ -57,14 +57,14 @@ namespace TootTallyDiffCalcTTV2
             NOTE_COUNT = _chart.notesDict[0].Count;
         }
 
-        public const float AIM_DIV = 20;
-        public const float AIM_END = 40;
-        public const float TAP_DIV = 20;
-        public const float TAP_END = 12;
+        public const float AIM_DIV = 14;
+        public const float AIM_END = 25;
+        public const float TAP_DIV = 17;
+        public const float TAP_END = 6;
         public const float ACC_DIV = 20;
         public const float ACC_END = 180;
         public const float MUL_END = 50;
-        public const float MAX_DIST = 8f;
+        public const float MAX_DIST = 10f;
         public const float VEL_DIV = 200f;
 
         public void CalculatePerformances(int speedIndex)
@@ -81,7 +81,7 @@ namespace TootTallyDiffCalcTTV2
                 float weightSum = 0f;
                 var aimStrain = 0f;
                 var tapStrain = 0f;
-                for (int j = i - 1; j >= 0 && noteCount < 12 && (MathF.Abs(currentNote.position - noteList[j].position) <= MAX_DIST || i - j <= 2); j--)
+                for (int j = i - 1; j >= 0 && noteCount < 8 && (MathF.Abs(currentNote.position - noteList[j].position) <= MAX_DIST || i - j <= 2); j--)
                 {
                     var prevNote = noteList[j];
                     var nextNote = noteList[j + 1];
@@ -125,8 +125,8 @@ namespace TootTallyDiffCalcTTV2
 
                     //Aim Calc
                     var aimDistance = MathF.Abs(nextNote.pitchStart - prevNote.pitchEnd);
-                    var currVelocity = MathF.Abs(aimDistance / deltaTime);
-                    var velocityDebuffDelta = (lastVelocity == 0 && currVelocity == 0 ? .6f :  ComputeVelocityDebuff(lastVelocity, currVelocity)) - velocityDebuff;
+                    var currVelocity = (int)MathF.Abs(aimDistance / deltaTime);
+                    var velocityDebuffDelta = (lastVelocity == 0 && currVelocity == 0 ? .7f :  ComputeVelocityDebuff(lastVelocity, currVelocity)) - velocityDebuff;
                     velocityDebuff += velocityDebuffDelta / VEL_DIV;
 
                     if (aimDistance != 0)
@@ -147,8 +147,8 @@ namespace TootTallyDiffCalcTTV2
                 {
                     var endTapDivider = 61f - MathF.Min(currentNote.position - noteList[i - 1].position, 5f) * 12f;
                     var endAimDivider = MathF.Min(MathF.Abs(currentNote.pitchEnd - currentNote.pitchStart), CHEESABLE_THRESHOLD) / CHEESABLE_THRESHOLD * 51f + 10f;
-                    var aimThreshold = MathF.Sqrt(aimStrain) * 1.95f;//MathF.Pow(aimStrain, .8f) * 1.25f;
-                    var tapThreshold = MathF.Sqrt(tapStrain) * 1.95f;//MathF.Pow(tapStrain, .8f) * 3.5f;
+                    var aimThreshold = MathF.Sqrt(aimStrain) * 1.25f;//MathF.Pow(aimStrain, .8f) * 1.25f;
+                    var tapThreshold = MathF.Sqrt(tapStrain) * 1.25f;//MathF.Pow(tapStrain, .8f) * 3.5f;
                     if (aimEndurance >= aimThreshold)
                         ComputeEnduranceDecay(ref aimEndurance, (aimEndurance - aimThreshold) / endAimDivider);
                     if (tapEndurance >= tapThreshold)
@@ -186,13 +186,13 @@ namespace TootTallyDiffCalcTTV2
         #region AIM
         public static float CalcAimStrain(float distance, float weight, float deltaTime)
         {
-            var speed = MathF.Sqrt(distance + 5) * .4f / MathF.Pow(deltaTime, 1.38f);
+            var speed = MathF.Pow(distance, .45f) * .4f / MathF.Pow(deltaTime, 1.32f);
             return speed * weight;
         }
 
         public static float CalcAimEndurance(float distance, float weight, float deltaTime)
         {
-            var speed = MathF.Sqrt(distance + 5) * .15f / MathF.Pow(deltaTime, 1.08f) / (AIM_END * MUL_END);
+            var speed = MathF.Pow(distance, .45f) * .15f / MathF.Pow(deltaTime, 1.08f) / (AIM_END * MUL_END);
             return speed * weight;
         }
         #endregion
@@ -201,7 +201,7 @@ namespace TootTallyDiffCalcTTV2
         public static float CalcTapStrain(float tapDelta, float weight, float aimDistance)
         {
             var baseValue = MathF.Min(Utils.Lerp(3.25f, 5.5f, aimDistance / CHEESABLE_THRESHOLD), 6f);
-            return (baseValue / MathF.Pow(tapDelta, 1.38f)) * weight;
+            return (baseValue / MathF.Pow(tapDelta, 1.32f)) * weight;
         }
 
         public static float CalcTapEndurance(float tapDelta, float weight, float aimDistance)
