@@ -30,4 +30,4 @@ jobs:
         with:
             webhook-url: ${{ secrets.WEBHOOK_URL }}
             content: "New build pushed to master for diff calc! (Commit `${{ github.sha }}`)"
-            filename: ./TootTallyDiffCalcToPython/bin/Debug/net6.0/TootTallyDiffCalcTTV2.dll
+            filename: ./TootTallyDiffCalcToPython/bin/Debug/net8.0/TootTallyDiffCalcTTV2.dll
