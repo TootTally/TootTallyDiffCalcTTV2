@@ -17,7 +17,7 @@ jobs:
       - name: Setup .NET 6 environment
         uses: actions/setup-dotnet@v4
         with:
-            dotnet-version: '6.x'
+            dotnet-version: '10.x'
       - name: Build diffcalc DLL
         run: dotnet build
       - name: Save DLL as artifact
