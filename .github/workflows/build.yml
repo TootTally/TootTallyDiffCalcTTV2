@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-      - name: Setup .NET 6 environment
+      - name: Setup .NET 8 environment
         uses: actions/setup-dotnet@v4
         with:
             dotnet-version: '10.x'
@@ -24,7 +24,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
             name: DiffCalcDLL
-            path: ./TootTallyDiffCalcToPython/bin/Debug/net6.0/TootTallyDiffCalcTTV2.dll
+            path: ./TootTallyDiffCalcToPython/bin/Debug/net8.0/TootTallyDiffCalcTTV2.dll
       - name: Send over file to Discord
         uses: tsickert/discord-webhook@v6.0.0
         with:
