@@ -19,13 +19,14 @@ namespace TootTallyDiffCalcTTV2
              0.0064f, 0.0057f, 0.0051f, 0.0046f, 0.0041f, 0.0037f, 0.0033f, 0.0030f,
              0.0027f, 0.0024f, 0.0022f, 0.0020f, 0.0018f, 0.0016f, 0.0015f, 0.0013f // :)
         };
-        public DataVector[][] aimPerfMatrix;
+        public DataVector[][] aimPerfDict;
         public DataVectorAnalytics[] aimAnalyticsArray;
 
-        public DataVector[][] tapPerfMatrix;
+        public DataVector[][] tapPerfDict;
         public DataVectorAnalytics[] tapAnalyticsArray;
 
-        public ExtraDataVector[][] extraDataVectorMatrix;
+        public DataVector[][] accPerfDict;
+        public DataVectorAnalytics[] accAnalyticsArray;
 
         public float[] aimRatingDict;
         public float[] tapRatingDict;
@@ -44,13 +45,14 @@ namespace TootTallyDiffCalcTTV2
             noteCount = chart.noteCount;
             tempo = chart.tempo;
 
-            aimPerfMatrix = new DataVector[Utils.GAME_SPEED.Length][];
+            aimPerfDict = new DataVector[Utils.GAME_SPEED.Length][];
             aimAnalyticsArray = new DataVectorAnalytics[Utils.GAME_SPEED.Length];
 
-            tapPerfMatrix = new DataVector[Utils.GAME_SPEED.Length][];
+            tapPerfDict = new DataVector[Utils.GAME_SPEED.Length][];
             tapAnalyticsArray = new DataVectorAnalytics[Utils.GAME_SPEED.Length];
 
-            extraDataVectorMatrix = new ExtraDataVector[Utils.GAME_SPEED.Length][];
+            accPerfDict = new DataVector[Utils.GAME_SPEED.Length][];
+            accAnalyticsArray = new DataVectorAnalytics[Utils.GAME_SPEED.Length];
 
             aimRatingDict = new float[Utils.GAME_SPEED.Length];
             tapRatingDict = new float[Utils.GAME_SPEED.Length];
@@ -58,9 +60,9 @@ namespace TootTallyDiffCalcTTV2
 
             for (int i = 0; i < Utils.GAME_SPEED.Length; i++)
             {
-                extraDataVectorMatrix[i] = new ExtraDataVector[ALL_NOTE_COUNT];
-                aimPerfMatrix[i] = new DataVector[ALL_NOTE_COUNT];
-                tapPerfMatrix[i] = new DataVector[ALL_NOTE_COUNT];
+                aimPerfDict[i] = new DataVector[ALL_NOTE_COUNT];
+                tapPerfDict[i] = new DataVector[ALL_NOTE_COUNT];
+                accPerfDict[i] = new DataVector[ALL_NOTE_COUNT];
             }
         }
 
@@ -157,23 +159,8 @@ namespace TootTallyDiffCalcTTV2
                 aimSta = ComputeStamina(aimStrain * .55f, aimSta, tapDelta);
                 aimEnd = ComputeEndurance(aimSta * 1.55f, aimEnd, tapDelta);
 
-                //If you're at the start or end, copy the current note as the previous or next note
-                extraDataVectorMatrix[speedIndex][i] = new ExtraDataVector(
-                    n1Current,
-                    i == _notesArray.Length - 1 ? n1Current : _notesArray[i + 1],
-                    i == 0 ? n1Current : _notesArray[i - 1],
-                    tempo,
-                    newTempo,
-                    aimStrain,
-                    tapStrain,
-                    aimSta,
-                    tapSta,
-                    aimEnd,
-                    tapEnd,
-                    weightSum);
-
-                aimPerfMatrix[speedIndex][i] = new DataVector(n1Current.position, aimStrain, aimSta, aimEnd, weightSum);
-                tapPerfMatrix[speedIndex][i] = new DataVector(n1Current.position, tapStrain, tapSta, tapEnd, weightSum);
+                aimPerfDict[speedIndex][i] = new DataVector(n1Current.position, aimStrain, aimSta, aimEnd, weightSum);
+                tapPerfDict[speedIndex][i] = new DataVector(n1Current.position, tapStrain, tapSta, tapEnd, weightSum);
             }
         }
 
@@ -218,8 +205,8 @@ namespace TootTallyDiffCalcTTV2
 
         public void CalculateAnalytics(int gamespeed)
         {
-            aimAnalyticsArray[gamespeed] = new DataVectorAnalytics(aimPerfMatrix[gamespeed]);
-            tapAnalyticsArray[gamespeed] = new DataVectorAnalytics(tapPerfMatrix[gamespeed]);
+            aimAnalyticsArray[gamespeed] = new DataVectorAnalytics(aimPerfDict[gamespeed]);
+            tapAnalyticsArray[gamespeed] = new DataVectorAnalytics(tapPerfDict[gamespeed]);
         }
 
 
@@ -242,11 +229,11 @@ namespace TootTallyDiffCalcTTV2
                 starRatingDict[gamespeed] = 0f;
         }
 
-        public float GetDynamicAimRating(int hitCount, float speed) => GetDynamicSkillRating(hitCount, speed, aimPerfMatrix);
-        public float GetDynamicTapRating(int hitCount, float speed) => GetDynamicSkillRating(hitCount, speed, tapPerfMatrix);
+        public float GetDynamicAimRating(int hitCount, float speed) => GetDynamicSkillRating(hitCount, speed, aimPerfDict);
+        public float GetDynamicTapRating(int hitCount, float speed) => GetDynamicSkillRating(hitCount, speed, tapPerfDict);
 
-        public float GetDynamicAimTT(int hitCount, float speed) => GetDynamicTTRating(hitCount, speed, aimPerfMatrix);
-        public float GetDynamicTapTT(int hitCount, float speed) => GetDynamicTTRating(hitCount, speed, tapPerfMatrix);
+        public float GetDynamicAimTT(int hitCount, float speed) => GetDynamicTTRating(hitCount, speed, aimPerfDict);
+        public float GetDynamicTapTT(int hitCount, float speed) => GetDynamicTTRating(hitCount, speed, tapPerfDict);
 
         private float GetDynamicSkillRating(int hitCount, float speed, DataVector[][] skillRatingMatrix)
         {
@@ -440,46 +427,13 @@ namespace TootTallyDiffCalcTTV2
 
         public void Dispose()
         {
-            aimPerfMatrix = null;
+            aimPerfDict = null;
             aimAnalyticsArray = null;
             aimRatingDict = null;
-            tapPerfMatrix = null;
+            tapPerfDict = null;
             tapAnalyticsArray = null;
             tapRatingDict = null;
             starRatingDict = null;
-        }
-
-        public struct ExtraDataVector
-        {
-            public float
-                distanceToNextNote, distanceFromPreviousNote,
-                timingToNextNote, timingFromPreviousNote,
-                nextNotePos, prevNotePos,
-                aimStrain, tapStrain,
-                aimSta, aimEnd, tapSta, tapEnd,
-                weightSum;
-
-
-            public ExtraDataVector(Note currentNote, Note nextNote, Note previousNote, float tempo, float newTempo,
-                float aimStrain, float tapStrain, float aimSta, float tapSta, float aimEnd, float tapEnd,
-                float weightSum)
-            {
-                ConvertNote(nextNote, tempo, newTempo, out nextNote);
-                ConvertNote(previousNote, tempo, newTempo, out previousNote);
-                nextNotePos = nextNote.position;
-                prevNotePos = previousNote.position;
-                distanceToNextNote = nextNote.pitchStart - currentNote.pitchEnd;
-                distanceFromPreviousNote = previousNote.pitchEnd - currentNote.pitchStart;
-                timingToNextNote = nextNote.position - currentNote.position;
-                timingFromPreviousNote = currentNote.position - previousNote.position;
-                this.aimStrain = aimStrain;
-                this.tapStrain = tapStrain;
-                this.tapSta = tapSta;
-                this.tapEnd = tapEnd;
-                this.aimSta = aimSta;
-                this.aimEnd = aimEnd;
-                this.weightSum = weightSum;
-            }
         }
 
         public struct DataVector(float time, float strain, float stamina, float endurance, float weight)
@@ -493,13 +447,13 @@ namespace TootTallyDiffCalcTTV2
 
         public struct DataVectorAnalytics
         {
-            public float perfSum, perfWeightedAverage;
+            public float perfMax, perfSum, perfWeightedAverage;
             public float weightSum;
             public float sumTT;
 
             public DataVectorAnalytics(DataVector[] dataVectorList)
             {
-                perfSum = perfWeightedAverage = 0;
+                perfMax = perfSum = perfWeightedAverage = 0;
                 weightSum = 1;
                 sumTT = 0;
 
@@ -519,7 +473,10 @@ namespace TootTallyDiffCalcTTV2
                 for (int i = 0; i < dataVectorList.Length; i++)
                 {
                     var weight = dataVectorList[i].weight / weightSum;
-                    perfSum += (dataVectorList[i].strain + dataVectorList[i].stamina + dataVectorList[i].endurance) * weight;
+                    var perf = dataVectorList[i].strain + dataVectorList[i].stamina + dataVectorList[i].endurance;
+                    if (perfMax < perf)
+                        perfMax = perf;
+                    perfSum += perf * weight;
                     sumTT += CalcStrainTT(dataVectorList[i].strain * weight) + CalcStamTT(dataVectorList[i].stamina * weight) + CalcEnduTT(dataVectorList[i].endurance * weight);
                 }
                 perfWeightedAverage = perfSum;
