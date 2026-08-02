@@ -124,8 +124,8 @@ namespace TootTallyDiffCalcTTV2
 
         //public float GetLerpedStarRating(float speed) => performances.GetDiffRating(Math.Clamp(speed, 0.5f, 2f));
 
-        public float GetAimPerformance(float speed) => performances.aimAnalyticsArray[SpeedToIndex(speed)].perfWeightedAverage;
-        public float GetTapPerformance(float speed) => performances.tapAnalyticsArray[SpeedToIndex(speed)].perfWeightedAverage;
+        public float GetAimPerformance(float speed) => performances.aimAnalyticsDict[SpeedToIndex(speed)].perfWeightedAverage;
+        public float GetTapPerformance(float speed) => performances.tapAnalyticsDict[SpeedToIndex(speed)].perfWeightedAverage;
 
         public float GetStarRating(float speed) => performances.starRatingDict[SpeedToIndex(speed)];
 

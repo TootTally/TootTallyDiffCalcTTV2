@@ -19,14 +19,14 @@ namespace TootTallyDiffCalcTTV2
              0.0064f, 0.0057f, 0.0051f, 0.0046f, 0.0041f, 0.0037f, 0.0033f, 0.0030f,
              0.0027f, 0.0024f, 0.0022f, 0.0020f, 0.0018f, 0.0016f, 0.0015f, 0.0013f // :)
         };
-        public DataVector[][] aimPerfDict;
-        public DataVectorAnalytics[] aimAnalyticsArray;
+        public DataVector[][] aimPerfMatrix;
+        public DataVectorAnalytics[] aimAnalyticsDict;
 
-        public DataVector[][] tapPerfDict;
-        public DataVectorAnalytics[] tapAnalyticsArray;
+        public DataVector[][] tapPerfMatrix;
+        public DataVectorAnalytics[] tapAnalyticsDict;
 
-        public DataVector[][] accPerfDict;
-        public DataVectorAnalytics[] accAnalyticsArray;
+        public DataVector[][] accPerfMatrix;
+        public DataVectorAnalytics[] accAnalyticsDict;
 
         public float[] aimRatingDict;
         public float[] tapRatingDict;
@@ -45,14 +45,14 @@ namespace TootTallyDiffCalcTTV2
             noteCount = chart.noteCount;
             tempo = chart.tempo;
 
-            aimPerfDict = new DataVector[Utils.GAME_SPEED.Length][];
-            aimAnalyticsArray = new DataVectorAnalytics[Utils.GAME_SPEED.Length];
+            aimPerfMatrix = new DataVector[Utils.GAME_SPEED.Length][];
+            aimAnalyticsDict = new DataVectorAnalytics[Utils.GAME_SPEED.Length];
 
-            tapPerfDict = new DataVector[Utils.GAME_SPEED.Length][];
-            tapAnalyticsArray = new DataVectorAnalytics[Utils.GAME_SPEED.Length];
+            tapPerfMatrix = new DataVector[Utils.GAME_SPEED.Length][];
+            tapAnalyticsDict = new DataVectorAnalytics[Utils.GAME_SPEED.Length];
 
-            accPerfDict = new DataVector[Utils.GAME_SPEED.Length][];
-            accAnalyticsArray = new DataVectorAnalytics[Utils.GAME_SPEED.Length];
+            accPerfMatrix = new DataVector[Utils.GAME_SPEED.Length][];
+            accAnalyticsDict = new DataVectorAnalytics[Utils.GAME_SPEED.Length];
 
             aimRatingDict = new float[Utils.GAME_SPEED.Length];
             tapRatingDict = new float[Utils.GAME_SPEED.Length];
@@ -60,9 +60,9 @@ namespace TootTallyDiffCalcTTV2
 
             for (int i = 0; i < Utils.GAME_SPEED.Length; i++)
             {
-                aimPerfDict[i] = new DataVector[ALL_NOTE_COUNT];
-                tapPerfDict[i] = new DataVector[ALL_NOTE_COUNT];
-                accPerfDict[i] = new DataVector[ALL_NOTE_COUNT];
+                aimPerfMatrix[i] = new DataVector[ALL_NOTE_COUNT];
+                tapPerfMatrix[i] = new DataVector[ALL_NOTE_COUNT];
+                accPerfMatrix[i] = new DataVector[ALL_NOTE_COUNT];
             }
         }
 
@@ -159,8 +159,8 @@ namespace TootTallyDiffCalcTTV2
                 aimSta = ComputeStamina(aimStrain * .55f, aimSta, tapDelta);
                 aimEnd = ComputeEndurance(aimSta * 1.55f, aimEnd, tapDelta);
 
-                aimPerfDict[speedIndex][i] = new DataVector(n1Current.position, aimStrain, aimSta, aimEnd, weightSum);
-                tapPerfDict[speedIndex][i] = new DataVector(n1Current.position, tapStrain, tapSta, tapEnd, weightSum);
+                aimPerfMatrix[speedIndex][i] = new DataVector(n1Current.position, aimStrain, aimSta, aimEnd, weightSum);
+                tapPerfMatrix[speedIndex][i] = new DataVector(n1Current.position, tapStrain, tapSta, tapEnd, weightSum);
             }
         }
 
@@ -205,15 +205,15 @@ namespace TootTallyDiffCalcTTV2
 
         public void CalculateAnalytics(int gamespeed)
         {
-            aimAnalyticsArray[gamespeed] = new DataVectorAnalytics(aimPerfDict[gamespeed]);
-            tapAnalyticsArray[gamespeed] = new DataVectorAnalytics(tapPerfDict[gamespeed]);
+            aimAnalyticsDict[gamespeed] = new DataVectorAnalytics(aimPerfMatrix[gamespeed]);
+            tapAnalyticsDict[gamespeed] = new DataVectorAnalytics(tapPerfMatrix[gamespeed]);
         }
 
 
         public void CalculateRatings(int gamespeed)
         {
-            var aimRating = aimRatingDict[gamespeed] = aimAnalyticsArray[gamespeed].perfWeightedAverage + 0.01f;
-            var tapRating = tapRatingDict[gamespeed] = tapAnalyticsArray[gamespeed].perfWeightedAverage + 0.01f;
+            var aimRating = aimRatingDict[gamespeed] = aimAnalyticsDict[gamespeed].perfWeightedAverage + 0.01f;
+            var tapRating = tapRatingDict[gamespeed] = tapAnalyticsDict[gamespeed].perfWeightedAverage + 0.01f;
 
             if (aimRating != 0 && tapRating != 0)
             {
@@ -229,11 +229,11 @@ namespace TootTallyDiffCalcTTV2
                 starRatingDict[gamespeed] = 0f;
         }
 
-        public float GetDynamicAimRating(int hitCount, float speed) => GetDynamicSkillRating(hitCount, speed, aimPerfDict);
-        public float GetDynamicTapRating(int hitCount, float speed) => GetDynamicSkillRating(hitCount, speed, tapPerfDict);
+        public float GetDynamicAimRating(int hitCount, float speed) => GetDynamicSkillRating(hitCount, speed, aimPerfMatrix);
+        public float GetDynamicTapRating(int hitCount, float speed) => GetDynamicSkillRating(hitCount, speed, tapPerfMatrix);
 
-        public float GetDynamicAimTT(int hitCount, float speed) => GetDynamicTTRating(hitCount, speed, aimPerfDict);
-        public float GetDynamicTapTT(int hitCount, float speed) => GetDynamicTTRating(hitCount, speed, tapPerfDict);
+        public float GetDynamicAimTT(int hitCount, float speed) => GetDynamicTTRating(hitCount, speed, aimPerfMatrix);
+        public float GetDynamicTapTT(int hitCount, float speed) => GetDynamicTTRating(hitCount, speed, tapPerfMatrix);
 
         private float GetDynamicSkillRating(int hitCount, float speed, DataVector[][] skillRatingMatrix)
         {
@@ -427,11 +427,11 @@ namespace TootTallyDiffCalcTTV2
 
         public void Dispose()
         {
-            aimPerfDict = null;
-            aimAnalyticsArray = null;
+            aimPerfMatrix = null;
+            aimAnalyticsDict = null;
             aimRatingDict = null;
-            tapPerfDict = null;
-            tapAnalyticsArray = null;
+            tapPerfMatrix = null;
+            tapAnalyticsDict = null;
             tapRatingDict = null;
             starRatingDict = null;
         }
