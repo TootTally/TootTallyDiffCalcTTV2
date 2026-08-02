@@ -19,6 +19,7 @@ namespace TootTallyDiffCalcTTV2
              0.0064f, 0.0057f, 0.0051f, 0.0046f, 0.0041f, 0.0037f, 0.0033f, 0.0030f,
              0.0027f, 0.0024f, 0.0022f, 0.0020f, 0.0018f, 0.0016f, 0.0015f, 0.0013f // :)
         };
+
         public DataVector[][] aimPerfMatrix;
         public DataVectorAnalytics[] aimAnalyticsDict;
 
