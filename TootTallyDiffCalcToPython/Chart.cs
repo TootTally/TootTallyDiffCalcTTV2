@@ -2,7 +2,7 @@
 
 namespace TootTallyDiffCalcTTV2
 {
-    public struct Chart
+    public class Chart
     {
         public float[][] notes;
         public string[][] bgdata;
