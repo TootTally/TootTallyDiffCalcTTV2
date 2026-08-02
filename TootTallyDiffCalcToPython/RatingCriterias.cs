@@ -1,25 +1,24 @@
 ﻿namespace TootTallyDiffCalcTTV2
 {
-    public static class RatingCriterias
+    public struct RatingCriterias
     {
-
         public static List<RatingError> GetRatingErrors(Chart chart)
         {
             List<RatingError> errors = new List<RatingError>();
 
-            var lastNote = chart.notesDict[2].Last();
+            var lastNote = chart.notesArray.Last();
             HashSet<float> seenNotes = new HashSet<float>();
 
             //Warning on note count smaller than 24 notes
-            if (chart.notesDict[2].Count < 24)
-                errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.NoteCount, 0, 0, chart.notesDict[2].Count));
+            if (chart.notesArray.Length < 24)
+                errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.NoteCount, 0, 0, chart.notesArray.Length));
 
             //Warning on chart being having less than 10s worth of notes
-            if (lastNote.position + lastNote.length - chart.notesDict[2][1].position <= 10f)
-                errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.MapLength, chart.notesDict[2].Count - 1, lastNote.position + lastNote.length, lastNote.position + lastNote.length));
+            if (lastNote.position + lastNote.length - chart.notesArray[1].position <= 10f)
+                errors.Add(new RatingError(ErrorLevel.Warning, ErrorType.MapLength, chart.notesArray.Length - 1, lastNote.position + lastNote.length, lastNote.position + lastNote.length));
 
             Note previousNote = new Note(-1, 0,0,0,0,0,false);
-            var noteList = chart.notesDict[2].OrderBy(x => x.position).ToList().GetRange(1,chart.notesDict[2].Count - 1); //Remove first fake note
+            var noteList = chart.notesArray.OrderBy(x => x.position).ToList().GetRange(1,chart.notesArray.Length - 1); //Remove first fake note
             for (int i = 0; i < noteList.Count - 1; i++)
             {
                 Note currentNote = noteList[i];
@@ -128,7 +127,7 @@
         }
 
 
-        public class RatingError
+        public struct RatingError
         {
             public ErrorLevel errorLevel;
             public ErrorType errorType;

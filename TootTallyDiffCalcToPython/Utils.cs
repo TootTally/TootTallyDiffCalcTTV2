@@ -44,57 +44,57 @@ namespace TootTallyDiffCalcTTV2
             CalculateBaseTT(LerpDiff(diffRatings, replaySpeed)) * GetMultiplier(percent, modifiers);
 
         //OLD: https://www.desmos.com/calculator/6rle1shggs
-        public static readonly Dictionary<float, float> accToMultDict = new Dictionary<float, float>()
+        public static readonly Dictionary<float, float> accToEZMultDict = new Dictionary<float, float>()
         {
-            { 1f, 36.4f },
-            { .999f, 30.2f },
-            { .996f, 26.2f },
-            { .993f, 23.2f },
-            { .99f, 20.5f },
-            { .985f, 18.1f },
-            { .98f, 16.1f },
-            { .97f, 13.8f },
-            { .96f, 11.8f },
-            { .95f, 10.8f },
-            { .925f, 9.6f },
-            { .9f, 8.9f },
-            { .875f, 8.3f },
-            { .85f, 7.7f },
-            { .8f, 6.6f },
-            { .7f, 4.4f },
-            { .6f, 2.4f },
-            { .5f, 1.2f },
-            { .25f, 0.5f },
-            { 0, 0 }
+            { 1f, 1f },//{ 1f, 1f },
+            { .999f, .999f },//{ .999f, .999f },
+            { .996f, .985f },//{ .996f, .98f },
+            { .993f, .98f },//{ .993f, .96f },
+            { .99f, .975f },//{ .99f, .93f },
+            { .985f, .96f },//{ .985f, .9f },
+            { .98f, .94f },//{ .98f, .875f },
+            { .97f, .9f },//{ .97f, .835f },
+            { .96f, .86f },//{ .96f, .8f },
+            { .95f, .82f },//{ .95f, .765f },
+            { .925f, .75f },//{ .925f, .7f },
+            { .9f, .69f },//{ .9f, .645f },
+            { .875f, .64f },//{ .875f, .59f },
+            { .85f, .6f },//{ .85f, .55f },
+            { .8f, .52f },//{ .8f, .55f },
+            { .7f, .39f },//{ .7f, .45f },
+            { .6f, .29f },//{ .6f, .4f },
+            { .5f, .22f },//{ .5f, .35f },
+            { .25f, .1f },//{ .25f, .2f },
+            { 0, 0 },//{ 0, 0 },
         };
 
-        public static readonly Dictionary<float, float> ezAccToMultDict = new Dictionary<float, float>()
+        public static readonly Dictionary<float, float> accToMultDict = new Dictionary<float, float>()
         {
-             { 1f, 13.8f },   
-             { .999f, 13.6f },
-             { .996f, 13.3f },
-             { .993f, 13f },
-             { .99f, 12.5f },
-             { .985f, 12f },
-             { .98f, 11.5f }, 
-             { .97f, 10.6f },
-             { .96f, 9.6f },
-             { .95f, 9f },
-             { .925f, 8f },
-             { .9f, 7.2f },
-             { .875f, 6.7f },
-             { .85f, 6.3f }, 
-             { .8f, 5.6f },
-             { .7f, 4.2f },
-             { .6f, 2.25f },  
-             { .5f, 1f },
-             { .25f, .03f },  
-             { 0, 0 },
+            { 1f, 1.5f },
+            { .999f, 1.4f },
+            { .996f, 1.3f },
+            { .993f, 1.2f },
+            { .99f, 1.1f },
+            { .985f, 1f },
+            { .98f, .92f },
+            { .97f, .81f },
+            { .96f, .71f },
+            { .95f, .67f },
+            { .925f, .61f },
+            { .9f, .57f },
+            { .875f, .53f },
+            { .85f, .5f },
+            { .8f, .46f },
+            { .7f, .39f },
+            { .6f, .325f },
+            { .5f, .255f },
+            { .25f, .11f },
+            { 0, 0 },
         };
 
         public static float GetMultiplier(float percent, string[] modifiers = null)
         {
-            var multDict = (modifiers != null && modifiers.Contains("EZ")) ? ezAccToMultDict : accToMultDict;
+            var multDict = (modifiers != null && modifiers.Contains("EZ")) ? accToEZMultDict : accToMultDict;
             int index;
             for (index = 1; index < multDict.Count && multDict.Keys.ElementAt(index) > percent; index++) ;
             var percMax = multDict.Keys.ElementAt(index);
