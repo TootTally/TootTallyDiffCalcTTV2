@@ -26,22 +26,12 @@ namespace TootTallyDiffCalcTTV2
             return (float)result;
         }
 
-        //TT for S rank (60% score)
-        //https://www.desmos.com/calculator/rhwqyp21nr
-        public static float CalculateBaseTT(float starRating)
-        {
-            return (0.5f * FastPow(starRating, 2) + (7f * starRating) + 0.05f);
-            //y = (0.7x^2 + 12x + 0.05)/1.5
-        }
 
         public static float CalculateScoreTT(Chart chart, ScoreData score) =>
-            CalculateBaseTT(chart.GetDynamicDiffRating(score.replay_speed, score.GetHitCount, score.modifiers)) * GetMultiplier(score.percentage, score.modifiers);
+            chart.GetDynamicTTRating(score.replay_speed, score.GetHitCount, GetMultiplier(score.percentage, score.modifiers), score.modifiers);
 
         public static float CalculateScoreTT(Chart chart, float replaySpeed, int hitCount, float percent, string[] modifiers = null) =>
-            CalculateBaseTT(chart.GetDynamicDiffRating(replaySpeed, hitCount, modifiers)) * GetMultiplier(percent, modifiers);
-
-        public static float CalculateScoreTT(float[] diffRatings, float replaySpeed, float percent, string[] modifiers = null) =>
-            CalculateBaseTT(LerpDiff(diffRatings, replaySpeed)) * GetMultiplier(percent, modifiers);
+            chart.GetDynamicTTRating(replaySpeed, hitCount, GetMultiplier(percent, modifiers), modifiers);
 
         //OLD: https://www.desmos.com/calculator/6rle1shggs
         public static readonly Dictionary<float, float> accToEZMultDict = new Dictionary<float, float>()
