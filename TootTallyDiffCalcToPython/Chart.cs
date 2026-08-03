@@ -52,6 +52,7 @@ namespace TootTallyDiffCalcTTV2
             if (songLength < 1) songLength = 1;
 
             performances = new ChartPerformances(this);
+            CalcPerformances();
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             ratingErrors = RatingCriterias.GetRatingErrors(this);

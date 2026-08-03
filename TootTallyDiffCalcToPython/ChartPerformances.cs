@@ -67,7 +67,7 @@ namespace TootTallyDiffCalcTTV2
         }
 
         public const float AIM_DIV = 6;
-        public const float TAP_DIV = 8;
+        public const float TAP_DIV = 6;
         public const float ACC_DIV = 8;
         public const float MAX_DIST = 5f;
         public const int MAX_NOTE_COUNT = 16;
