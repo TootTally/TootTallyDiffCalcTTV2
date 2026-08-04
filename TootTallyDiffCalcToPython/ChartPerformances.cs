@@ -147,7 +147,7 @@ namespace TootTallyDiffCalcTTV2
 
                     //Tap
                     var baseValue = (MathF.Sqrt(aimDistance) / 20f) + .0475f;
-                    tapStrain += ((baseValue / MathF.Pow(deltaTime, 1.52f)) * weight) / TAP_DIV;
+                    tapStrain += ((baseValue / MathF.Pow(deltaTime, 1.42f)) * weight) / TAP_DIV;
                     weightSum += weight;
                 }
 
