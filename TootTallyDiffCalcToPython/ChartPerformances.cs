@@ -25,6 +25,9 @@ namespace TootTallyDiffCalcTTV2
         public DataVector[][] tapPerfMatrix;
         public DataVectorAnalytics[] tapAnalyticsDict;
 
+        public DataVector[][] accPerfMatrix;
+        public DataVectorAnalytics[] accAnalyticsDict;
+
         public float[] aimRatingDict;
         public float[] tapRatingDict;
         public float[] starRatingDict;
@@ -48,6 +51,9 @@ namespace TootTallyDiffCalcTTV2
             tapPerfMatrix = new DataVector[Utils.GAME_SPEED.Length][];
             tapAnalyticsDict = new DataVectorAnalytics[Utils.GAME_SPEED.Length];
 
+            accPerfMatrix = new DataVector[Utils.GAME_SPEED.Length][];
+            accAnalyticsDict = new DataVectorAnalytics[Utils.GAME_SPEED.Length];
+
             aimRatingDict = new float[Utils.GAME_SPEED.Length];
             tapRatingDict = new float[Utils.GAME_SPEED.Length];
             starRatingDict = new float[Utils.GAME_SPEED.Length];
@@ -56,6 +62,7 @@ namespace TootTallyDiffCalcTTV2
             {
                 aimPerfMatrix[i] = new DataVector[ALL_NOTE_COUNT];
                 tapPerfMatrix[i] = new DataVector[ALL_NOTE_COUNT];
+                accPerfMatrix[i] = new DataVector[ALL_NOTE_COUNT];
             }
         }
 
