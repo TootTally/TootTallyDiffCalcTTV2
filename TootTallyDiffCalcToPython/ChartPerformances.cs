@@ -25,9 +25,6 @@ namespace TootTallyDiffCalcTTV2
         public DataVector[][] tapPerfMatrix;
         public DataVectorAnalytics[] tapAnalyticsDict;
 
-        public DataVector[][] accPerfMatrix;
-        public DataVectorAnalytics[] accAnalyticsDict;
-
         public float[] aimRatingDict;
         public float[] tapRatingDict;
         public float[] starRatingDict;
@@ -51,9 +48,6 @@ namespace TootTallyDiffCalcTTV2
             tapPerfMatrix = new DataVector[Utils.GAME_SPEED.Length][];
             tapAnalyticsDict = new DataVectorAnalytics[Utils.GAME_SPEED.Length];
 
-            accPerfMatrix = new DataVector[Utils.GAME_SPEED.Length][];
-            accAnalyticsDict = new DataVectorAnalytics[Utils.GAME_SPEED.Length];
-
             aimRatingDict = new float[Utils.GAME_SPEED.Length];
             tapRatingDict = new float[Utils.GAME_SPEED.Length];
             starRatingDict = new float[Utils.GAME_SPEED.Length];
@@ -62,13 +56,12 @@ namespace TootTallyDiffCalcTTV2
             {
                 aimPerfMatrix[i] = new DataVector[ALL_NOTE_COUNT];
                 tapPerfMatrix[i] = new DataVector[ALL_NOTE_COUNT];
-                accPerfMatrix[i] = new DataVector[ALL_NOTE_COUNT];
             }
         }
 
-        public const float AIM_DIV = 6;
-        public const float TAP_DIV = 6;
-        public const float ACC_DIV = 8;
+        public const float AIM_DIV = 14;
+        public const float TAP_DIV = 14;
+        public const float ACC_DIV = 10;
         public const float MAX_DIST = 5f;
         public const int MAX_NOTE_COUNT = 16;
         public const float CHEESABLE_THRESHOLD = 34.375f;
@@ -114,7 +107,7 @@ namespace TootTallyDiffCalcTTV2
                         ConvertNote(in _notesArray[j + 1], tempo, newTempo, out n2Next);
 
                         lengthSum += n2Prev.length;
-                        if (n2Prev.pitchDelta != 0)
+                        if (MathF.Abs(n2Prev.pitchDelta) >= CHEESABLE_THRESHOLD / 10f)
                         {
                             slideCount++;
                             var pitchDelta = MathF.Abs(n2Prev.pitchDelta);
@@ -146,18 +139,18 @@ namespace TootTallyDiffCalcTTV2
                     }
 
                     //Tap
-                    var baseValue = (MathF.Sqrt(aimDistance) / 20f) + .0475f;
-                    tapStrain += ((baseValue / MathF.Pow(deltaTime, 1.42f)) * weight) / TAP_DIV;
+                    var baseValue = (MathF.Sqrt(aimDistance) / 10f) + .0725f;
+                    tapStrain += ((baseValue / MathF.Pow(deltaTime, 1.36f)) * weight) / TAP_DIV;
                     weightSum += weight;
                 }
 
                 var tapDelta = MathF.Sqrt(n1Current.position - n1Prev.position);
 
-                tapSta = ComputeStamina(tapStrain * 1.85f, tapSta, tapDelta);
-                tapEnd = ComputeEndurance(tapSta * 1.55f, tapEnd, tapDelta);
+                tapSta = ComputeStamina(tapStrain * 1.85f, tapSta, tapDelta, STA_DIV);
+                tapEnd = ComputeEndurance(tapSta * 1.55f, tapEnd, tapDelta, END_DIV);
 
-                aimSta = ComputeStamina(aimStrain * .55f, aimSta, tapDelta);
-                aimEnd = ComputeEndurance(aimSta * 1.55f, aimEnd, tapDelta);
+                aimSta = ComputeStamina(aimStrain * .55f, aimSta, tapDelta, STA_DIV);
+                aimEnd = ComputeEndurance(aimSta * 1.55f, aimEnd, tapDelta, END_DIV);
 
                 aimPerfMatrix[speedIndex][i] = new DataVector(n1Current.position, aimStrain, aimSta, aimEnd, weightSum);
                 tapPerfMatrix[speedIndex][i] = new DataVector(n1Current.position, tapStrain, tapSta, tapEnd, weightSum);
@@ -173,24 +166,24 @@ namespace TootTallyDiffCalcTTV2
         //public static float ComputeStaminaTapMult(float decayRate) => MathF.Pow(MathF.E, -decayRate * 1.5f);
 
         const float STA_RISE_RATE = 1.45f;
-        const float STA_DECAY_RATE = .15f;
+        const float STA_DECAY_RATE = .25f;
         const float STA_DIV = 5f;
         const float END_RISE_RATE = .15f;
         const float END_DECAY_RATE = .15f;
         const float END_DIV = 25f;
 
-        public static float ComputeStamina(float strain, float stamina, float tapDelta)
+        public static float ComputeStamina(float strain, float stamina, float tapDelta, float div)
         {
-            return stamina + ((strain - stamina) / STA_DIV) * ((strain > stamina) ?
-                                              1f - MathF.Pow((float)Math.E, -STA_RISE_RATE * tapDelta) :
-                                              1f - MathF.Pow((float)Math.E, -STA_DECAY_RATE * tapDelta));
+            return stamina + ((strain - stamina) / div) * ((strain > stamina) ?
+                                              1f - MathF.Pow(MathF.E, -STA_RISE_RATE * tapDelta) :
+                                              1f - MathF.Pow(MathF.E, -STA_DECAY_RATE * tapDelta));
             //return newStam < 0 ? 0 : newStam;
         }
-        public static float ComputeEndurance(float stamina, float endurance, float tapDelta)
+        public static float ComputeEndurance(float stamina, float endurance, float tapDelta, float div)
         {
-            return endurance + ((stamina - endurance) / END_DIV) * ((stamina > endurance) ?
-                                              1f - MathF.Pow((float)Math.E, -END_RISE_RATE * tapDelta) :
-                                              1f - MathF.Pow((float)Math.E, -END_DECAY_RATE * tapDelta));
+            return endurance + ((stamina - endurance) / div) * ((stamina > endurance) ?
+                                              1f - MathF.Pow(MathF.E, -END_RISE_RATE * tapDelta) :
+                                              1f - MathF.Pow(MathF.E, -END_DECAY_RATE * tapDelta));
             //return newEnd < 0 ? 0 : newEnd;
         }
 
@@ -482,9 +475,9 @@ namespace TootTallyDiffCalcTTV2
                 perfWeightedAverage = perfSum;
             }
         }
-        public static float CalcStrainTT(float performance) => performance * 315f;
-        public static float CalcStamTT(float stamina) => stamina * 175f;
-        public static float CalcEnduTT(float endurance) => endurance * 175f;
+        public static float CalcStrainTT(float performance) => performance * 350f;
+        public static float CalcStamTT(float stamina) => stamina * 425f;
+        public static float CalcEnduTT(float endurance) => endurance * 425f;
 
         public static float BeatToSeconds2(float beat, float bpm) => 60f / bpm * beat;
     }
