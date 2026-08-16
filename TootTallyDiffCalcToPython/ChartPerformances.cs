@@ -66,7 +66,7 @@ namespace TootTallyDiffCalcTTV2
             }
         }
 
-        public const float AIM_DIV = 14;
+        public const float AIM_DIV = 6;
         public const float TAP_DIV = 14;
         public const float ACC_DIV = 10;
         public const float MAX_DIST = 5f;
@@ -97,7 +97,7 @@ namespace TootTallyDiffCalcTTV2
                     var slideCount = 0f;
                     var slideVelocity = 0f;
                     var flatLength = 0f;
-                    if (n2Prev.pitchDelta != 0)
+                    if (MathF.Abs(n2Prev.pitchDelta) >= CHEESABLE_THRESHOLD / 10f)
                     {
                         slideCount++;
                         var pitchDelta = MathF.Abs(n2Prev.pitchDelta);
@@ -141,7 +141,7 @@ namespace TootTallyDiffCalcTTV2
                     var aimDistance = MathF.Abs(NormalizePitch(n2Next.pitchStart - n2Prev.pitchEnd));
                     if (aimDistance != 0)
                     {
-                        var currVelocity = (MathF.Sqrt(aimDistance + .02f) * .95f) / MathF.Pow(deltaTime, 1.32f);
+                        var currVelocity = (MathF.Sqrt(aimDistance + .02f) * .45f) / MathF.Pow(deltaTime, 1.32f);
                         aimStrain += (currVelocity * weight) / AIM_DIV;
                     }
 
@@ -450,6 +450,7 @@ namespace TootTallyDiffCalcTTV2
             public float perfMax, perfSum, perfWeightedAverage;
             public float weightSum;
             public float sumTT;
+            public const float STAR_MULT = 2.5f;
 
             public DataVectorAnalytics(DataVector[] dataVectorList)
             {
@@ -476,7 +477,7 @@ namespace TootTallyDiffCalcTTV2
                     var perf = dataVectorList[i].strain + dataVectorList[i].stamina + dataVectorList[i].endurance;
                     if (perfMax < perf)
                         perfMax = perf;
-                    perfSum += perf * weight;
+                    perfSum += perf * weight * STAR_MULT;
                     sumTT += CalcStrainTT(dataVectorList[i].strain * weight) + CalcStamTT(dataVectorList[i].stamina * weight) + CalcEnduTT(dataVectorList[i].endurance * weight);
                 }
                 perfWeightedAverage = perfSum;
