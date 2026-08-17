@@ -347,7 +347,10 @@ namespace TootTallyDiffCalcTTV2
                     tapPow += EZWeights[1];
                 }
                 if (modifiers.Contains("AP"))
+                {
                     aimPow = 0;
+                    tapRating *= .6f;
+                }
                 if (modifiers.Contains("RX"))
                     tapPow = 0;
 
@@ -401,7 +404,10 @@ namespace TootTallyDiffCalcTTV2
                 }
 
                 if (modifiers.Contains("AP"))
+                {
                     aimPow = 0;
+                    tapTT *= .6f;
+                }
                 if (modifiers.Contains("RX"))
                     tapPow = 0;
 
