@@ -349,7 +349,7 @@ namespace TootTallyDiffCalcTTV2
                 if (modifiers.Contains("AP"))
                 {
                     aimPow = 0;
-                    tapRating *= .6f;
+                    tapRating *= .5f;
                 }
                 if (modifiers.Contains("RX"))
                     tapPow = 0;
