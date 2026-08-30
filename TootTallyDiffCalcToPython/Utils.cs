@@ -91,7 +91,7 @@ namespace TootTallyDiffCalcTTV2
             var percMin = multDict.Keys.ElementAt(index - 1);
             var by = (percent - percMin) / (percMax - percMin);
             var mult = Utils.Lerp(multDict[percMin], multDict[percMax], by);
-            var nmAPMult = (modifiers != null && modifiers.Contains("AP") && !modifiers.Contains("EZ") ? 1.2f : 1f);
+            var nmAPMult = (modifiers != null && modifiers.Contains("AP") && !modifiers.Contains("EZ")) ? 1.2f : 1f;
             return mult * nmAPMult;
         }
 
