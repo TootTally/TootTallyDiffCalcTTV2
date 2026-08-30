@@ -84,14 +84,15 @@ namespace TootTallyDiffCalcTTV2
 
         public static float GetMultiplier(float percent, string[] modifiers = null)
         {
-            var multDict = (modifiers != null && modifiers.Contains("EZ")) ? accToEZMultDict : accToMultDict;
+            var multDict = (modifiers != null && (modifiers.Contains("EZ") || modifiers.Contains("AP"))) ? accToEZMultDict : accToMultDict;
             int index;
             for (index = 1; index < multDict.Count && multDict.Keys.ElementAt(index) > percent; index++) ;
             var percMax = multDict.Keys.ElementAt(index);
             var percMin = multDict.Keys.ElementAt(index - 1);
             var by = (percent - percMin) / (percMax - percMin);
-            var mult = Lerp(multDict[percMin], multDict[percMax], by);
-            return mult;
+            var mult = Utils.Lerp(multDict[percMin], multDict[percMax], by);
+            var nmAPMult = (modifiers != null && modifiers.Contains("AP") && !modifiers.Contains("EZ") ? 1.2f : 1f);
+            return mult * nmAPMult;
         }
 
         public static float LerpDiff(float[] diffRatings, float speed)
