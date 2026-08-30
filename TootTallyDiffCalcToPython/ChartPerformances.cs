@@ -461,7 +461,7 @@ namespace TootTallyDiffCalcTTV2
             public DataVectorAnalytics(DataVector[] dataVectorList)
             {
                 perfMax = perfSum = perfWeightedAverage = 0;
-                weightSum = 1;
+                weightSum = 150;
                 sumTT = 0;
 
                 if (dataVectorList == null || dataVectorList.Length <= 0) return;
