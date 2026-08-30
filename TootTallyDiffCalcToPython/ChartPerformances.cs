@@ -330,7 +330,7 @@ namespace TootTallyDiffCalcTTV2
                 var aimPow = 1f;
                 var tapPow = 1f;
                 var isEZModeOn = modifiers.Contains("EZ");
-                var mult = isEZModeOn || modifiers.Contains("AP") ? .25f : 1f;
+                var mult = (isEZModeOn || modifiers.Contains("AP")) ? .25f : 1f;
                 if (modifiers.Contains("HD"))
                 {
                     aimPow += HDWeights[0] * mult;
@@ -349,7 +349,7 @@ namespace TootTallyDiffCalcTTV2
                 if (modifiers.Contains("AP"))
                 {
                     aimPow = 0;
-                    tapRating *= .5f;
+                    tapRating *= .75f;
                 }
                 if (modifiers.Contains("RX"))
                     tapPow = 0;
@@ -386,7 +386,7 @@ namespace TootTallyDiffCalcTTV2
             if (modifiers != null)
             {
                 var isEZModeOn = modifiers.Contains("EZ");
-                var mult = isEZModeOn ? .25f : 1f;
+                var mult = (isEZModeOn || modifiers.Contains("AP")) ? .25f : 1f;
                 if (modifiers.Contains("HD"))
                 {
                     aimPow += HDWeights[0] * mult;
@@ -406,7 +406,7 @@ namespace TootTallyDiffCalcTTV2
                 if (modifiers.Contains("AP"))
                 {
                     aimPow = 0;
-                    tapTT *= .6f;
+                    tapTT *= .75f;
                 }
                 if (modifiers.Contains("RX"))
                     tapPow = 0;
