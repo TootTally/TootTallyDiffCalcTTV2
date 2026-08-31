@@ -66,7 +66,7 @@ namespace TootTallyDiffCalcTTV2
             }
         }
 
-        public const float AIM_DIV = 6;
+        public const float AIM_DIV = 8;
         public const float TAP_DIV = 14;
         public const float ACC_DIV = 10;
         public const float MAX_DIST = 5f;
@@ -489,7 +489,7 @@ namespace TootTallyDiffCalcTTV2
                 perfWeightedAverage = perfSum;
             }
         }
-        public static float CalcStrainTT(float performance) => performance * 350f;
+        public static float CalcStrainTT(float performance) => performance * 600f;
         public static float CalcStamTT(float stamina) => stamina * 425f;
         public static float CalcEnduTT(float endurance) => endurance * 425f;
 
