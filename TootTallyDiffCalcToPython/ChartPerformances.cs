@@ -68,7 +68,7 @@ namespace TootTallyDiffCalcTTV2
 
         public const float AIM_DIV = 8;
         public const float TAP_DIV = 14;
-        public const float ACC_DIV = 10;
+        public const float ACC_DIV = 12;
         public const float MAX_DIST = 5f;
         public const int MAX_NOTE_COUNT = 16;
         public const float CHEESABLE_THRESHOLD = 34.375f;
@@ -461,7 +461,7 @@ namespace TootTallyDiffCalcTTV2
             public DataVectorAnalytics(DataVector[] dataVectorList)
             {
                 perfMax = perfSum = perfWeightedAverage = 0;
-                weightSum = 150;
+                weightSum = 200;
                 sumTT = 0;
 
                 if (dataVectorList == null || dataVectorList.Length <= 0) return;
@@ -489,9 +489,9 @@ namespace TootTallyDiffCalcTTV2
                 perfWeightedAverage = perfSum;
             }
         }
-        public static float CalcStrainTT(float performance) => performance * 600f;
-        public static float CalcStamTT(float stamina) => stamina * 425f;
-        public static float CalcEnduTT(float endurance) => endurance * 425f;
+        public static float CalcStrainTT(float performance) => performance * 700f;
+        public static float CalcStamTT(float stamina) => stamina * 400f;
+        public static float CalcEnduTT(float endurance) => endurance * 400f;
 
         public static float BeatToSeconds2(float beat, float bpm) => 60f / bpm * beat;
     }
