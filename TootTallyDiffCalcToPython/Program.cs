@@ -6,8 +6,8 @@ namespace TootTallyDiffCalcTTV2
     {
         public static List<Chart> chartList;
         public const string VERSION_LABEL = "6.0.0";
-        public const string EXTRA = "1.0.0";
-        public const string BUILD_DATE = "17082026";
+        public const string EXTRA = "1.0.1";
+        public const string BUILD_DATE = "31082026";
         public static StreamWriter fileWriter;
 
         public static void Main()
