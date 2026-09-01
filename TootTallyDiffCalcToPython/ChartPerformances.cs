@@ -141,7 +141,7 @@ namespace TootTallyDiffCalcTTV2
                     var aimDistance = MathF.Abs(NormalizePitch(n2Next.pitchStart - n2Prev.pitchEnd));
                     if (aimDistance != 0)
                     {
-                        var currVelocity = (MathF.Sqrt(aimDistance + .02f) * .45f) / MathF.Pow(deltaTime, 1.32f);
+                        var currVelocity = (MathF.Sqrt(aimDistance) * .45f) / MathF.Pow(deltaTime, 1.38f);
                         aimStrain += (currVelocity * weight) / AIM_DIV;
                     }
 
@@ -349,10 +349,13 @@ namespace TootTallyDiffCalcTTV2
                 if (modifiers.Contains("AP"))
                 {
                     aimPow = 0;
-                    tapRating *= .7f;
+                    tapRating *= .55f;
                 }
                 if (modifiers.Contains("RX"))
+                {
                     tapPow = 0;
+                    aimRating *= .55f;
+                }
 
                 if (aimPow < 0) aimPow = .01f;
                 if (tapPow < 0) tapPow = .01f;
@@ -406,10 +409,13 @@ namespace TootTallyDiffCalcTTV2
                 if (modifiers.Contains("AP"))
                 {
                     aimPow = 0;
-                    tapTT *= .7f;
+                    tapTT *= .55f;
                 }
                 if (modifiers.Contains("RX"))
+                {
                     tapPow = 0;
+                    aimTT *= .55f;
+                }
 
                 if (aimPow < 0) aimPow = .01f;
                 if (tapPow < 0) tapPow = .01f;
