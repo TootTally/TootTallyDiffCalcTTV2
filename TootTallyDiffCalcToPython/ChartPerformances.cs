@@ -141,13 +141,13 @@ namespace TootTallyDiffCalcTTV2
                     var aimDistance = MathF.Abs(NormalizePitch(n2Next.pitchStart - n2Prev.pitchEnd));
                     if (aimDistance != 0)
                     {
-                        var currVelocity = (MathF.Sqrt(aimDistance) * .45f) / MathF.Pow(deltaTime, 1.38f);
+                        var currVelocity = (MathF.Sqrt(aimDistance) * .45f) / MathF.Pow(deltaTime, 1.32f);
                         aimStrain += (currVelocity * weight) / AIM_DIV;
                     }
 
                     //Tap
-                    var baseValue = (MathF.Sqrt(aimDistance) / 10f) + .0725f;
-                    tapStrain += ((baseValue / MathF.Pow(deltaTime, 1.36f)) * weight) / TAP_DIV;
+                    var baseValue = (MathF.Sqrt(aimDistance) / 15f) + .075f;
+                    tapStrain += ((baseValue / MathF.Pow(deltaTime, 1.39f)) * weight) / TAP_DIV;
                     weightSum += weight;
                 }
 
@@ -495,9 +495,9 @@ namespace TootTallyDiffCalcTTV2
                 perfWeightedAverage = perfSum;
             }
         }
-        public static float CalcStrainTT(float performance) => performance * 700f;
-        public static float CalcStamTT(float stamina) => stamina * 400f;
-        public static float CalcEnduTT(float endurance) => endurance * 400f;
+        public static float CalcStrainTT(float performance) => performance * 875f;
+        public static float CalcStamTT(float stamina) => stamina * 300f;
+        public static float CalcEnduTT(float endurance) => endurance * 300f;
 
         public static float BeatToSeconds2(float beat, float bpm) => 60f / bpm * beat;
     }
