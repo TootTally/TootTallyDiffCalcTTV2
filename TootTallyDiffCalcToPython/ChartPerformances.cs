@@ -495,9 +495,9 @@ namespace TootTallyDiffCalcTTV2
                 perfWeightedAverage = perfSum;
             }
         }
-        public static float CalcStrainTT(float performance) => performance * 875f;
-        public static float CalcStamTT(float stamina) => stamina * 300f;
-        public static float CalcEnduTT(float endurance) => endurance * 300f;
+        public static float CalcStrainTT(float performance) => performance * 850f;
+        public static float CalcStamTT(float stamina) => stamina * 375f;
+        public static float CalcEnduTT(float endurance) => endurance * 375f;
 
         public static float BeatToSeconds2(float beat, float bpm) => 60f / bpm * beat;
     }
