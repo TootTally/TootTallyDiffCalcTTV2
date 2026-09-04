@@ -135,6 +135,34 @@ namespace TootTallyDiffCalcTTV2
         public static float BeatToSeconds2(float beat, float bpm) => 60f / bpm * beat;
 
         #region Replays
+
+        //Scan through tootdata, increase closestNoteIndex when the note passes, ignore toots where note is further than 1s away, count the amount of valid toots within note ranges and if its more than 2.5x the note count, then its probably raked
+        public bool IsReplayRaked(ReplayData replay)
+        {
+            float newTempo = replay.gamespeedmultiplier * tempo;
+            int validTootCount = 0;
+            int nextNoteIndex = 0;
+            float closestNoteTime = ChartPerformances.ConvertTime(notesArray.First().position, tempo, newTempo);
+            float closestNoteTimeLength = ChartPerformances.ConvertTime(notesArray.First().length, tempo, newTempo);
+            for (int i = 0; i < replay.tootdata.Count(); i++)
+            {
+                var tootTime = replay.tootdata[i][0];
+                if (tootTime == 0 || replay.tootdata[i][2] == 0) continue;
+                while (nextNoteIndex < notesArray.Length - 1 && tootTime > closestNoteTime)
+                {
+                    closestNoteTimeLength = ChartPerformances.ConvertTime(notesArray[nextNoteIndex].length, tempo, newTempo);
+                    closestNoteTime = ChartPerformances.ConvertTime(notesArray[++nextNoteIndex].position, tempo, newTempo) + closestNoteTimeLength;
+                }
+                if (closestNoteTime != 0 && closestNoteTimeLength <= 1.5f && closestNoteTime - closestNoteTimeLength - tootTime < .350f)
+                    validTootCount++;
+            }
+            Console.WriteLine($"True Toot Count: {replay.tootdata.Where(x => x[2] == 1).Count()}");
+            Console.WriteLine($"Filtered Toot Count: {validTootCount}");
+            Console.WriteLine($"Note Count: {notesArray.Length}");
+            Console.WriteLine($"Expected maximum filtered toot count: {notesArray.Length * 2.15f}");
+            return validTootCount >= notesArray.Length * 2.15f;
+        }
+
         public static int GetConvertionVersion(ReplayData replay)
         {
             if (replay.version == "0.0.0")

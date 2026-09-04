@@ -23,7 +23,7 @@ namespace TootTallyDiffCalcTTV2
                 if (File.Exists(path))
                 {
                     if (path.Contains(".ttr"))
-                        TestReplayConvertion(path);
+                        TestReplayIsRaked(path);
                     else
                         OutputSingleChart(path, true);
                 }
@@ -173,6 +173,30 @@ namespace TootTallyDiffCalcTTV2
             Console.WriteLine($"Converted replay score: {convertedReplay.finalscore}");
             Console.WriteLine($"Converted replay accuracy: {convertedReplay.finalscore / chart.maxScore:P2}");
             File.WriteAllText(path.Replace(".ttr", "-Converted.ttr"), convertedReplay.GetJsonString());
+        }
+
+        public static void TestReplayIsRaked(string path)
+        {
+            ReplayData replay = ChartReader.LoadReplay(path);
+            WriteToConsoleAndFile($"Replay Loaded.");
+            Chart chart = null;
+            var tmbpath = "";
+            while (chart == null || chart.name != replay.song)
+            {
+                Console.Write($"Input path for {replay.song}: ");
+                tmbpath = @"" + Console.ReadLine();
+                if (File.Exists(tmbpath))
+                    try
+                    {
+                        chart = ChartReader.LoadChart(tmbpath);
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Chart not found.");
+                        chart = null;
+                    }
+            }
+            Console.WriteLine($"Replay was found to be {(chart.IsReplayRaked(replay) ? "" : "NOT ")}Raked.");
         }
 
         public static Chart ProcessChart(string path) => ChartReader.LoadChart(path);

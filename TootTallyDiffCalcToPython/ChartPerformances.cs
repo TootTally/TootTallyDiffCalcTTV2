@@ -197,9 +197,14 @@ namespace TootTallyDiffCalcTTV2
         public static void ConvertNote(in Note note, float tempo, float newTempo, out Note n)
         {
             n = note;
-            n.position = (note.position * tempo) / newTempo;
-            n.length = (note.length * tempo) / newTempo;
+            ConvertTime(note.position, tempo, newTempo, out n.position);
+            ConvertTime(note.length, tempo, newTempo, out n.length);
+            //n.position = (note.position * tempo) / newTempo;
+            //n.length = (note.length * tempo) / newTempo;
         }
+
+        public static void ConvertTime(in float position, float tempo, float newTempo, out float newPosition) => newPosition = (position * tempo) / newTempo;
+        public static float ConvertTime(float position, float tempo, float newTempo) => position * tempo / newTempo;
 
         public static float NormalizePitch(float pitch) => pitch / PLAY_AREA_RANGE;
 
