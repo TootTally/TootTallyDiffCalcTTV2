@@ -317,7 +317,7 @@ namespace TootTallyDiffCalcTTV2
 
         public const float AIM_WEIGHT = 1.25f;
         public const float TAP_WEIGHT = 1f;
-        public const float BIAS = .5f;
+        public const float BIAS = 1f;
 
         public static readonly float[] HDWeights = { .11f, .09f };
         public static readonly float[] FLWeights = { .12f, .1f };
@@ -361,6 +361,8 @@ namespace TootTallyDiffCalcTTV2
                     tapPow = 0;
                     aimRating *= .55f;
                 }
+                if (modifiers.Contains("RK"))
+                    tapRating *= .1f;
 
                 if (aimPow < 0) aimPow = .01f;
                 if (tapPow < 0) tapPow = .01f;
@@ -421,6 +423,8 @@ namespace TootTallyDiffCalcTTV2
                     tapPow = 0;
                     aimTT *= .55f;
                 }
+                if (modifiers.Contains("RK"))
+                    tapTT *= .1f;
 
                 if (aimPow < 0) aimPow = .01f;
                 if (tapPow < 0) tapPow = .01f;
