@@ -34,7 +34,7 @@ namespace TootTallyDiffCalcTTV2
 
         private readonly float tempo;
         private readonly int ALL_NOTE_COUNT;
-        private readonly int noteCount;
+        private readonly int NOTE_COUNT;
         private readonly Note[] _notesArray;
         private const float PLAY_AREA_RANGE = 360;
 
@@ -42,7 +42,7 @@ namespace TootTallyDiffCalcTTV2
         {
             _notesArray = chart.notesArray;
             ALL_NOTE_COUNT = chart.notesArray.Length;
-            noteCount = chart.noteCount;
+            NOTE_COUNT = chart.noteCount;
             tempo = chart.tempo;
 
             aimPerfMatrix = new DataVector[Utils.GAME_SPEED.Length][];
@@ -284,8 +284,8 @@ namespace TootTallyDiffCalcTTV2
             int maxRange;
 
             float percent = 1f;
-            if (hitCount < noteCount)
-                percent = MathF.Min((float)hitCount / noteCount, 1f);
+            if (hitCount < NOTE_COUNT)
+                percent = MathF.Min((float)hitCount / NOTE_COUNT, 1f);
 
             if (percent <= MACC)
                 maxRange = (int)Math.Clamp(skillRatingArray.Length * (percent * (MAP / MACC)), 1, skillRatingArray.Length);
@@ -302,8 +302,8 @@ namespace TootTallyDiffCalcTTV2
             int maxRange;
 
             float percent = 1f;
-            if (hitCount < noteCount)
-                percent = MathF.Min((float)hitCount / noteCount, 1f);
+            if (hitCount < NOTE_COUNT)
+                percent = MathF.Min((float)hitCount / NOTE_COUNT, 1f);
 
             if (percent <= MACC)
                 maxRange = (int)Math.Clamp(skillRatingArray.Length * (percent * (MAP / MACC)), 1, skillRatingArray.Length);
@@ -471,7 +471,7 @@ namespace TootTallyDiffCalcTTV2
             public float perfMax, perfSum, perfWeightedAverage;
             public float weightSum;
             public float sumTT;
-            public const float STAR_MULT = 2.5f;
+            public const float STAR_MULT = 4f;
 
             public DataVectorAnalytics(DataVector[] dataVectorList)
             {
