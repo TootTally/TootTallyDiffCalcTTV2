@@ -156,10 +156,10 @@ namespace TootTallyDiffCalcTTV2
                 if (closestNoteTime != 0 && closestNoteTimeLength <= 1.5f && closestNoteTime - closestNoteTimeLength - tootTime < .350f)
                     validTootCount++;
             }
-            Console.WriteLine($"True Toot Count: {replay.tootdata.Where(x => x[2] == 1).Count()}");
+            /*Console.WriteLine($"True Toot Count: {replay.tootdata.Where(x => x[2] == 1).Count()}");
             Console.WriteLine($"Filtered Toot Count: {validTootCount}");
             Console.WriteLine($"Note Count: {notesArray.Length}");
-            Console.WriteLine($"Expected maximum filtered toot count: {notesArray.Length * 2.15f}");
+            Console.WriteLine($"Expected maximum filtered toot count: {notesArray.Length * 2.15f}");*/
             return validTootCount >= notesArray.Length * 2.15f;
         }
 
