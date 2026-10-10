@@ -77,11 +77,13 @@ namespace TootTallyDiffCalcTTV2
         {
             var newTempo = Utils.GAME_SPEED[speedIndex] * tempo;
             float aimEnd = 0, aimSta = 0, tapEnd = 0, tapSta = 0;
+            float lastVelocity = 0, velocityDebuff = 1;
             for (int i = 1; i < ALL_NOTE_COUNT; i++) //Main Forward Loop
             {
                 int noteCount = 0;
                 float aimStrain = 0, tapStrain = 0;
                 float weightSum = 1;
+                float currVelocity = 0f, currVelocitySum = 0f;
                 ConvertNote(in _notesArray[i], tempo, newTempo, out var n1Current);
                 ConvertNote(in _notesArray[i - 1], tempo, newTempo, out var n2Prev);
                 Note n1Prev = default;
@@ -141,7 +143,7 @@ namespace TootTallyDiffCalcTTV2
                     var aimDistance = MathF.Abs(NormalizePitch(n2Next.pitchStart - n2Prev.pitchEnd));
                     if (aimDistance != 0)
                     {
-                        var currVelocity = (MathF.Sqrt(aimDistance) * .45f) / MathF.Pow(deltaTime, 1.32f);
+                        currVelocity = (MathF.Sqrt(aimDistance) * .45f) / MathF.Pow(deltaTime, 1.32f);
                         aimStrain += (currVelocity * weight) / AIM_DIV;
                     }
 
@@ -152,6 +154,12 @@ namespace TootTallyDiffCalcTTV2
                 }
 
                 var tapDelta = MathF.Sqrt(n1Current.position - n1Prev.position);
+
+                var velocityDelta = MathF.Abs(lastVelocity - currVelocitySum);
+                velocityDebuff = Math.Clamp(ComputerVelocityDebuff(velocityDebuff, velocityDelta, tapDelta, VEL_DIV), .4f, 1.05f);
+                aimStrain *= velocityDebuff;
+                tapStrain *= velocityDebuff;
+                lastVelocity = currVelocitySum;
 
                 tapSta = ComputeStamina(tapStrain * 1.85f, tapSta, tapDelta, STA_DIV);
                 tapEnd = ComputeEndurance(tapSta * 1.55f, tapEnd, tapDelta, END_DIV);
@@ -178,7 +186,9 @@ namespace TootTallyDiffCalcTTV2
         const float END_RISE_RATE = .15f;
         const float END_DECAY_RATE = .15f;
         const float END_DIV = 25f;
-
+        const float VEL_RISE_RATE = 1.5f;
+        const float VEL_DECAY_RATE = .25f;
+        const float VEL_DIV = 25f;
         public static float ComputeStamina(float strain, float stamina, float tapDelta, float div)
         {
             return stamina + ((strain - stamina) / div) * ((strain > stamina) ?
@@ -192,6 +202,13 @@ namespace TootTallyDiffCalcTTV2
                                               1f - MathF.Pow(MathF.E, -END_RISE_RATE * tapDelta) :
                                               1f - MathF.Pow(MathF.E, -END_DECAY_RATE * tapDelta));
             //return newEnd < 0 ? 0 : newEnd;
+        }
+
+        public static float ComputerVelocityDebuff(float debuff, float velocityDelta, float tapDelta, float div)
+        {
+            return debuff + ((velocityDelta - debuff) / div) * ((velocityDelta > debuff) ?
+                                              1f - MathF.Pow(MathF.E, -VEL_RISE_RATE * tapDelta) :
+                                              1f - MathF.Pow(MathF.E, -VEL_DECAY_RATE * tapDelta));
         }
 
         public static void ConvertNote(in Note note, float tempo, float newTempo, out Note n)

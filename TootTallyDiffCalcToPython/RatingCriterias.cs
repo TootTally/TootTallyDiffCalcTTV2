@@ -99,7 +99,7 @@
 
                     //If there's 2 flat sliders next to eachother that can be simplified
                     if (currentNote.pitchDelta == 0 && nextNote.pitchDelta == 0)
-                        errors.Add(new RatingError(ErrorLevel.Error, ErrorType.DuplicateSlider, i, currentNote.position, currentNote.position));
+                        errors.Add(new RatingError(ErrorLevel.Notice, ErrorType.DuplicateSlider, i, currentNote.position, currentNote.position));
 
                     //If the current slider's end is not the same pitch as the next slider's start
                     if (currentNote.pitchEnd != nextNote.pitchStart)
