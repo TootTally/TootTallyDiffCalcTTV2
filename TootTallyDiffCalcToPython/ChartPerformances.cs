@@ -144,6 +144,7 @@ namespace TootTallyDiffCalcTTV2
                     if (aimDistance != 0)
                     {
                         currVelocity = (MathF.Sqrt(aimDistance) * .45f) / MathF.Pow(deltaTime, 1.32f);
+                        currVelocitySum += currVelocity * weight;
                         aimStrain += (currVelocity * weight) / AIM_DIV;
                     }
 
@@ -403,6 +404,7 @@ namespace TootTallyDiffCalcTTV2
 
         public float GetDynamicTTRating(int hitCount, float gamespeed, float multiplier, string[] modifiers = null)
         {
+            if (modifiers == null || (!modifiers.Contains("EZ") && !modifiers.Contains("AP"))) hitCount = (int)(hitCount * 1.1f);
             var aimTT = GetDynamicAimTT(hitCount, gamespeed);
             var tapTT = GetDynamicTapTT(hitCount, gamespeed);
 
@@ -488,7 +490,7 @@ namespace TootTallyDiffCalcTTV2
             public float perfMax, perfSum, perfWeightedAverage;
             public float weightSum;
             public float sumTT;
-            public const float STAR_MULT = 4f;
+            public const float STAR_MULT = 3.75f;
 
             public DataVectorAnalytics(DataVector[] dataVectorList)
             {
